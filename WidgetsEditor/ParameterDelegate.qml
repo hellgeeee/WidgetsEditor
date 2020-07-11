@@ -54,7 +54,8 @@ Item {
     id: delegateCont
 
     property variant selectedItems: []
-    property bool selected: selectedItems.indexOf(index) >= 0//ListView.isCurrentItem
+    property string selectedItemsCount
+    property int numberAmongSelected: -1//ListView.isCurrentItem
     property var attribute: parameters.model[index]
 
     width: parent.width;
@@ -86,8 +87,8 @@ Item {
             Text {
                 id: titleText
                 anchors.leftMargin: stringHeight
-                color: selected ? "#000000" : "#505050"
-                scale: selected ? 1.15 : 1.0
+                color: numberAmongSelected >= 0 ? "#000000" : "#505050"
+                scale: numberAmongSelected >= 0 ? 1.15 : 1.0
                 text: attribute.name
                 wrapMode: Text.WordWrap
                 font.pixelSize: 26
@@ -117,11 +118,14 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-       //onClicked: delegateCont.ListView.view.currentIndex = index
         onClicked: {
-            if(selected)
-                selectedItems.pop(index)
+//        console.debug(selectedItems + ", cur ind: " + index + ", it's number in array: " + selectedItems.indexOf(index))
+            if(selectedItems.indexOf(index) >= 0)
+                selectedItems.splice(numberAmongSelected, 1)
             else selectedItems.push(index)
+            numberAmongSelected = selectedItems.indexOf(index)
+            selectedItemsCount = selectedItems.length
+            parameters.selectedItemsCount = selectedItems.length
         }
     }
 }

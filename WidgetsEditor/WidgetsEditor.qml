@@ -21,6 +21,7 @@ Item {
     property int smallGap : 8
     property font appFont: deviceCategorySearch.font
     property int prefixWidth: barContainer.width * 0.33
+
     property var outputFileContent: JSON.parse('{}')
     width: 800
     height: 480
@@ -41,16 +42,21 @@ Item {
     ListView {
         id: deviceCategories
 
-        property variant selectedItems: [1, "four", "five"]
         property int itemWidth: 190
+
+        property variant selectedItems: []
+        property string selectedItemsCount
+
         width: itemWidth
         orientation: ListView.Vertical
         anchors { top: deviceCategorySearch.bottom; bottom: parent.bottom}
         model: typeof(facilityCategoriesModel) !== "undefined" ? facilityCategoriesModel : null
-        footer: Footer{selectedItemsCount: deviceCategories.selectedItems.length}
+        footer: Footer{selectedItemsCount: deviceCategories.selectedItemsCount;}//deviceCategories.selectedItems.length}
+
         delegate: CategoryDelegate {
             property variant categoryModel: model
-            selectedItems: parameters.selectedItems
+
+            selectedItems: deviceCategories.selectedItems
             visible: model.name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
             itemSize: visible ? parent.width : 0
         }
@@ -68,7 +74,9 @@ Item {
     ListView {
         id: parameters
 
-        property variant selectedItems: [1, 2, 3, "four", "five"]
+        property variant selectedItems: []
+        property string selectedItemsCount
+
         anchors.left: deviceCategories.right
         anchors.right: fileEdit.left
         anchors.top: window.top
@@ -77,8 +85,8 @@ Item {
         anchors.rightMargin: stringHeight
         clip: true
         model: typeof(facilityCategoriesModel) !== "undefined" ? deviceCategories.currentItem.categoryModel.attributes : null
-        footer: Footer{selectedItemsCount: parameters.selectedItems.length}
-        delegate: ParameterDelegate {selectedItems: parameters.selectedItems}
+        footer: Footer{selectedItemsCount: parameters.selectedItemsCount}
+        delegate: ParameterDelegate {id: deleg; selectedItems: parameters.selectedItems}
     }
 
     ScrollBar {
@@ -174,7 +182,7 @@ Item {
             }
         }
     }
-    TextEdit {
+    TextArea {
         Rectangle{color: "#80804000"; anchors.fill: parent;}
         id: fileEdit
         visible: x > deviceCategories.width
@@ -182,9 +190,10 @@ Item {
         anchors.right: window.right
         anchors.top: deviceCategories.top
         anchors.bottom: fileNameInput.top
-        textMargin: smallGap
         wrapMode: TextEdit.WordWrap
         text: qsTr("Текст, который в файле")
+
+        placeholderText: qsTr("Пока что пусто")
         clip: true
         font: appFont
 //ListView{
@@ -317,7 +326,8 @@ attributes = attributes + { 'color': 'red', 'width': 100 }
        outputFileContent["analog_params"][analogAttrsCount] = [analogAttrsCount, analogAttrsCount]
        outputFileContent["text_params"][textAttrsCount] = [textAttrsCount, textAttrsCount]
        outputFileContent["param_icons"][textAttrsCount] = [textAttrsCount, textAttrsCount]
-       console.debug(JSON.stringify(outputFileContent))
+console.debug(JSON.stringify(outputFileContent))
+       fileEdit.text = JSON.stringify(outputFileContent, [], ' ')
 
        widgetChanged(outputFileContent);
    }

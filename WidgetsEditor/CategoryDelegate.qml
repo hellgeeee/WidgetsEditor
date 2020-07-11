@@ -4,9 +4,11 @@ import QtGraphicalEffects 1.0 // for ColorOverlay
 Rectangle {
     id: delegate
 
-    property variant selectedItems: []
-    property int numberAmongSelected: 0//ListView.isCurrentItem
     property real itemSize
+
+    property variant selectedItems: []
+    property int numberAmongSelected: -1//ListView.isCurrentItem
+
     width: itemSize
     height: itemSize
     Image {
@@ -29,12 +31,11 @@ Rectangle {
         }
         wrapMode: Text.WrapAnywhere
         font { pixelSize: 18; bold: true; family: appFont.family }
-        text: name
-        color: numberAmongSelected > 0 ? "#000000" : "#505050"
-        scale: numberAmongSelected > 0 ? 1.15 : 1.0
+        text: name + ", index:" + index + ", all:" + selectedItems
+        color: selectedItems.indexOf(index) >= 0 ? "#000000" : "#505050"
+        scale: selectedItems.indexOf(index) >= 0 ? 1.15 : 1.0
         Behavior on color { ColorAnimation { duration: 150 } }
         Behavior on scale { PropertyAnimation { duration: 300 } }
-        Component.onCompleted: console.debug("111_" +numberAmongSelected)
     }
 
     BusyIndicator {
@@ -44,16 +45,17 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-//        onClicked: {
-//            delegate.ListView.view.currentIndex = index
-//        }
         onClicked: {
-        console.debug(selectedItems + ", cur ind: " + index + ", it's number in array: " + selectedItems.indexOf(index))
+        console.debug(selectedItems + ", cur ind: " + index + ", it's number in array: " + selectedItems.indexOf(index) + ", length:" + selectedItems.length)
             if(selectedItems.indexOf(index) >= 0)
                 selectedItems.splice(numberAmongSelected, 1)
             else selectedItems.push(index)
             numberAmongSelected = selectedItems.indexOf(index)
 
+            /// костыль: почему-то не обновляется автоматически
+            deviceCategories.selectedItemsCount = selectedItems.length
+            titleText.color = selectedItems.indexOf(index) >= 0 ? "#000000" : "#505050"
+            titleText.scale = selectedItems.indexOf(index) >= 0 ? 1.15 : 1.0
         }
     }
 
