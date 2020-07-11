@@ -1,0 +1,12 @@
+Up and down btns in both lists
+Multiple choosing
+Screen output
+
+Settings/grafical editing - text input is active
+Settings/manual editing - text input is active
+Settings/Input-output Settings - whole Window : Folder, File,
+Settings/getting started - whole window
+Settings/about - whole window
+
+Transfer to c++
+Output in file from c++

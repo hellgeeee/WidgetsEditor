@@ -15,68 +15,76 @@ import "./"
 
 Item {
     id: window
-    width: 800
-    height: 480
-//    property string currentFeed: rssFeeds.get(0).feed
-    property bool loading: true//feedModel.status === XmlListModel.Loading
+
+    property bool loading: false
     property int stringHeight : 30
     property int smallGap : 8
     property font appFont: deviceCategorySearch.font
     property int prefixWidth: barContainer.width * 0.33
+    property var outputFileContent: JSON.parse('{}')
+    width: 800
+    height: 480
+    signal widgetChanged(var outputFileContent)
 
     TextArea{
         id: deviceCategorySearch
+
         height: stringHeight
-        anchors.left: deviceCategory.left
-        anchors.right: deviceCategory.right
+        anchors.left: deviceCategories.left
+        anchors.right: deviceCategories.right
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
         font.pixelSize: 14
+        z: 10
     }
+
     ListView {
-        id: deviceCategory
+        id: deviceCategories
+
+        property variant selectedItems: [1, "four", "five"]
         property int itemWidth: 190
         width: itemWidth
-        height: parent.height
         orientation: ListView.Vertical
-        anchors.top: deviceCategorySearch.bottom
-        model: facilityCategoriesModel
+        anchors { top: deviceCategorySearch.bottom; bottom: parent.bottom}
+        model: typeof(facilityCategoriesModel) !== "undefined" ? facilityCategoriesModel : null
+        footer: Footer{selectedItemsCount: deviceCategories.selectedItems.length}
         delegate: CategoryDelegate {
-            visible: model.name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
             property variant categoryModel: model
-            //color: model.name
-            itemSize: parent.width
+            selectedItems: parameters.selectedItems
+            visible: model.name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
+            itemSize: visible ? parent.width : 0
         }
-        spacing: 3
     }
 
     ScrollBar {
         orientation: Qt.Vertical
-        height: deviceCategory.height;
+        height: deviceCategories.height;
         width: smallGap
-        scrollArea: deviceCategory;
-        anchors.right: deviceCategory.right
+        scrollArea: deviceCategories;
+        anchors.right: deviceCategories.right
     }
 
 
     ListView {
         id: parameters
-        anchors.left: deviceCategory.right
+
+        property variant selectedItems: [1, 2, 3, "four", "five"]
+        anchors.left: deviceCategories.right
         anchors.right: fileEdit.left
         anchors.top: window.top
         anchors.bottom: barContainer.isEnoughRoomToShow ? barContainer.top : parent.bottom
         anchors.leftMargin: stringHeight
         anchors.rightMargin: stringHeight
         clip: true
-        model: deviceCategory.currentItem.categoryModel.attributes
-        footer: footerText
-        delegate: ParameterDelegate {}
+        model: typeof(facilityCategoriesModel) !== "undefined" ? deviceCategories.currentItem.categoryModel.attributes : null
+        footer: Footer{selectedItemsCount: parameters.selectedItems.length}
+        delegate: ParameterDelegate {selectedItems: parameters.selectedItems}
     }
 
     ScrollBar {
         scrollArea: parameters
         width: smallGap
-        anchors.right: fileEdit.left
+        anchors.right: parameters.right
         anchors.top: window.top
         anchors.bottom: parameters.bottom
     }
@@ -141,6 +149,13 @@ Item {
         anchors.top: closeButton.top
         anchors.right: closeButton.left
         anchors.rightMargin: width
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                paramsToJson()
+            }
+        }
     }
 
     Image {
@@ -162,10 +177,10 @@ Item {
     TextEdit {
         Rectangle{color: "#80804000"; anchors.fill: parent;}
         id: fileEdit
-        visible: x > deviceCategory.width
+        visible: x > deviceCategories.width
         width: window.width * 0.3
         anchors.right: window.right
-        anchors.top: deviceCategory.top
+        anchors.top: deviceCategories.top
         anchors.bottom: fileNameInput.top
         textMargin: smallGap
         wrapMode: TextEdit.WordWrap
@@ -229,6 +244,9 @@ Item {
                anchors.right: parent.right
                placeholderText: qsTr("Любые символы до 255 знаков")
            }
+
+
+           /// следующие два атрибута должны появляться лишь в случае, если поле аналоговое, т.е. выбрана вкладка bar.currentIndex == 1
            AttributeFieldPrefix{
                id: isShowBondariesPrefix
                visible: bar.currentIndex == 1
@@ -238,7 +256,7 @@ Item {
            }
            RowLayout {
                id: isShowBondaries
-               visible: bar.currentIndex == 1 && (width > 0)
+               visible: bar.currentIndex == 1
                anchors.top: attributeSignature.bottom
                anchors.left: isShowBondariesPrefix.right
                anchors.right: parent.right
@@ -276,18 +294,31 @@ Item {
        }
    }
 
-   Component {
-       id: footerText
-       Rectangle {
-           width: parameters.width
-           height: stringHeight
-           color: "lightgray"
-           visible: parent.parent.visible
-           Text {
-               text: qsTr("Выбрано атрибутов:")
-               anchors.centerIn: parent
-               font: appFont
-           }
+   function addOrDeleteItem(item, items){
+
+   }
+
+   function paramsToJson(){
+
+       if(JSON.stringify(outputFileContent) === '{}'){
+           outputFileContent["analog_params"] = JSON.parse('{}')
+           outputFileContent["text_params"] = JSON.parse('{}')
+           outputFileContent["param_icons"] = JSON.parse('{}')
        }
+var attributes = { 'color': 'red', 'width': 100 }
+attributes = attributes + { 'color': 'red', 'width': 100 }
+
+       var analogAttrsCount = 1, textAttrsCount = 1
+       for (var keyAnalog in outputFileContent["analog_params"])
+           analogAttrsCount++
+       for (var keyText in outputFileContent["analog_params"])
+           textAttrsCount++
+
+       outputFileContent["analog_params"][analogAttrsCount] = [analogAttrsCount, analogAttrsCount]
+       outputFileContent["text_params"][textAttrsCount] = [textAttrsCount, textAttrsCount]
+       outputFileContent["param_icons"][textAttrsCount] = [textAttrsCount, textAttrsCount]
+       console.debug(JSON.stringify(outputFileContent))
+
+       widgetChanged(outputFileContent);
    }
 }

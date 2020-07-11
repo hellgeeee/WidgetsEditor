@@ -52,110 +52,76 @@ import QtQuick 2.2
 
 Item {
     id: delegateCont
-    property bool selected: ListView.isCurrentItem
+
+    property variant selectedItems: []
+    property bool selected: selectedItems.indexOf(index) >= 0//ListView.isCurrentItem
     property var attribute: parameters.model[index]
+
     width: parent.width;
     height: 100 // todo make width dependent on content
-Column {
-    anchors.fill: parent
-    spacing: 8
 
-    // Returns a string representing how long ago an event occurred
-    function timeSinceEvent(pubDate) {
-        var result = pubDate;
+    Column {
+        anchors.fill: parent
+        spacing: smallGap
 
-        // We need to modify the pubDate read from the RSS feed
-        // so the JavaScript Date object can interpret it
-        var d = pubDate.replace(',','').split(' ');
-        if (d.length != 6)
-            return result;
+        Item { height: smallGap; width: parent.width }
 
-        var date = new Date([d[0], d[2], d[1], d[3], d[4], 'GMT' + d[5]].join(' '));
+        Row {
+            width: parent.width
+            spacing: 8
 
-        if (!isNaN(date.getDate())) {
-            var age = new Date() - date;
-            var minutes = Math.floor(Number(age) / 60000);
-            if (minutes < 1440) {
-                if (minutes < 2)
-                    result = qsTr("Just now");
-                else if (minutes < 60)
-                    result = '' + minutes + ' ' + qsTr("minutes ago")
-                else if (minutes < 120)
-                    result = qsTr("1 hour ago");
-                else
-                    result = '' + Math.floor(minutes/60) + ' ' + qsTr("hours ago");
-            }
-            else {
-                result = date.toDateString();
-            }
-        }
-        return result;
-    }
+            Column {
+                Item {
+                    width: smallGap * 0.5
+                    height: titleText.font.pixelSize * 0.25
+                }
 
-    Item { height: 8; width: parent.width }
-
-    Row {
-        width: parent.width
-        spacing: 8
-
-        Column {
-            Item {
-                width: 4
-                height: titleText.font.pixelSize / 4
+                Image {
+                    id: titleImage
+                    visible: source !== ""
+                    source: attribute.image !== "" ? attribute.image : ""
+                }
             }
 
-            Image {
-                id: titleImage
-//                source: image
+            Text {
+                id: titleText
+                anchors.leftMargin: stringHeight
+                color: selected ? "#000000" : "#505050"
+                scale: selected ? 1.15 : 1.0
+                text: attribute.name
+                wrapMode: Text.WordWrap
+                font.pixelSize: 26
+                font.bold: true
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on scale { PropertyAnimation { duration: 300 } }
             }
         }
 
         Text {
-            id: titleText
-            anchors.leftMargin: stringHeight
-            color: selected ? "#000000" : "#505050"
-            scale: selected ? 1.15 : 1.0
-            text: attribute.name
+            width: parent.width
+            font.pixelSize: appFont.pixelSize * 0.8
+            textFormat: Text.RichText
+            font.italic: true
+            text: qsTr("Поле с индексом " + "1" + " и подписью \"" + "asdfdf" + "\" ")
+        }
+
+        Text {
+            text: "Текстовое" + index
+            width: parent.width
             wrapMode: Text.WordWrap
-            font.pixelSize: 26
-            font.bold: true
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Behavior on scale { PropertyAnimation { duration: 300 } }
+            font.pixelSize: 14
+            textFormat: Text.StyledText
+            horizontalAlignment: Qt.AlignLeft
         }
     }
 
-    Text {
-        id: descriptionText0
-        width: parent.width
-        font.pixelSize: 12
-        textFormat: Text.RichText
-        font.italic: true
-        text: qsTr("Поле с индексом " + "1" + " и подписью \"" + "asdfdf" + "\" ")
-        onLinkActivated: {
-            Qt.openUrlExternally(link)
-        }
-    }
-
-    Text {
-        id: descriptionText
-
-        text: "Текстовое" + index
-        width: parent.width
-        wrapMode: Text.WordWrap
-        font.pixelSize: 14
-        textFormat: Text.StyledText
-        horizontalAlignment: Qt.AlignLeft
-    }
-}
-
-MouseArea {
-    anchors.fill: parent//delegate.height; width: delegate.width;
+    MouseArea {
+        anchors.fill: parent
+       //onClicked: delegateCont.ListView.view.currentIndex = index
         onClicked: {
-            delegateCont.ListView.view.currentIndex = index
-////            if (window.currentFeed == feed)
-////                feedModel.reload()
-////            else
-////                window.currentFeed = feed
-       }
-}
+            if(selected)
+                selectedItems.pop(index)
+            else selectedItems.push(index)
+        }
+    }
 }

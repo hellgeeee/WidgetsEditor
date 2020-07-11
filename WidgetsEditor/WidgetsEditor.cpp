@@ -8,8 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include<QDebug>
-
+                                    #include<QDebug>
 QList<QObject*> parse(const QString& fileName, QObject* rootParent)
 {
     QFile file;
@@ -21,29 +20,16 @@ QList<QObject*> parse(const QString& fileName, QObject* rootParent)
     QList<QObject*> facilityCategories;
     auto categoriesJsn = jsn["types"].toObject();
     for(auto category : categoriesJsn.keys() ){
-        auto categoryO = new FacilityCategory(category, rootParent);
+        auto parameters = categoriesJsn[category].toObject()["param"].toObject().keys();
+        if(parameters.count() == 0)
+            continue;
+        auto categoryO = new DeviceCategory(category, rootParent);
         facilityCategories.append(categoryO);
- //       for(auto paremeter : categoriesJsn[category].toObject().keys())
-        for(auto paremeter : categoriesJsn[category].toObject()["param"].toObject().keys())
+        for(auto paremeter : parameters)
             categoryO->addParameter(paremeter);
     }
 
     return facilityCategories;
-    //            if ( !grpJsn.contains( "description" ) )
-    //                continue;
-    //            int id = grpId.toInt();
-    //            if ( !grps.contains( id ) )
-    //                grps.insert( id, Group( grpJsn ) );
-
-
-
-
-
-
-
-
-
-
 
 
     /// вызов происходит из .qml-файла (P.S. я не знаю, зачем из .qml а не из .cpp)
@@ -137,10 +123,13 @@ QList<QObject*> parse(const QString& fileName, QObject* rootParent)
 
 }
 
-FacilityCategory::FacilityCategory( const QString& name, QObject* parent) : QObject(parent) {
+DeviceCategory::DeviceCategory( const QString& name, QObject* parent) : QObject(parent) {
     _name = name;
 }
 
+void OutputAcceptor::onWidgetChanged(const QJsonObject&){
+    qDebug()<<"Got in slot";
+}
 
 int main(int argc, char *argv[])
 {
@@ -149,7 +138,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QList<QObject*> facilityCategories = parse("../test/userFolder/test.json", &app);
-
     // for debug
 //    QList<QObject*> facilityCategories0;
 //    facilityCategories0.append(new FacilityCategory("red"));
@@ -166,5 +154,10 @@ int main(int argc, char *argv[])
     QQmlContext *ctxt = view.rootContext();
     ctxt->setContextProperty("facilityCategoriesModel", QVariant::fromValue(facilityCategories));
     view.show();
+
+ //   auto o = new OutputAcceptor(&app);
+//    QObject *item = dynamic_cast<QObject*>(view.rootObject());
+//    QObject::connect(o, SIGNAL(widgetChanged(const QJsonObject&)), o, SLOT(onWidgetChanged(const QJsonObject&)));
+
     return app.exec();
 }
