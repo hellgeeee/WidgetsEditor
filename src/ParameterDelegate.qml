@@ -53,10 +53,11 @@ import QtQuick 2.2
 Item {
     id: delegateCont
 
-    property variant selectedItems: []
-    property string selectedItemsCount
     property int numberAmongSelected: -1//ListView.isCurrentItem
-    property var attribute: parameters.model[index]
+    property var parameter: curentParameters[index]
+
+    property int parameterIndex: 0
+    property string parameterSignature: ""
 
     width: parent.width;
     height: 100 // todo make width dependent on content
@@ -80,19 +81,18 @@ Item {
                 Image {
                     id: titleImage
                     visible: source !== ""
-                    source: attribute.image !== "" ? attribute.image : ""
+                    source: parameter.image !== "" ? parameter.image : ""
                 }
             }
 
             Text {
                 id: titleText
                 anchors.leftMargin: stringHeight
-                color: numberAmongSelected >= 0 ? "#000000" : "#505050"
-                scale: numberAmongSelected >= 0 ? 1.15 : 1.0
-                text: attribute.name
+                color: numberAmongSelected >= 0 ? "#000000" : "#303030"
+                scale: numberAmongSelected >= 0 ? 1.5 : 1.0
+                text: parameter.name
                 wrapMode: Text.WordWrap
-                font.pixelSize: 26
-                font.bold: true
+                font {pixelSize: appFont.pixelSize; bold: true}
                 Behavior on color { ColorAnimation { duration: 150 } }
                 Behavior on scale { PropertyAnimation { duration: 300 } }
             }
@@ -103,11 +103,11 @@ Item {
             font.pixelSize: appFont.pixelSize * 0.8
             textFormat: Text.RichText
             font.italic: true
-            text: qsTr("Поле с индексом " + "1" + " и подписью \"" + "asdfdf" + "\" ")
+            text: qsTr("Поле" + " с индексом " + parameterIndex + " и подписью \"" + parameterSignature + "\" ")
         }
 
         Text {
-            text: "Текстовое" + index
+            text: "Текстовое"
             width: parent.width
             wrapMode: Text.WordWrap
             font.pixelSize: 14
@@ -119,13 +119,18 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-//        console.debug(selectedItems + ", cur ind: " + index + ", it's number in array: " + selectedItems.indexOf(index))
-            if(selectedItems.indexOf(index) >= 0)
-                selectedItems.splice(numberAmongSelected, 1)
-            else selectedItems.push(index)
-            numberAmongSelected = selectedItems.indexOf(index)
-            selectedItemsCount = selectedItems.length
-            parameters.selectedItemsCount = selectedItems.length
+            numberAmongSelected = onItemClicked(index, selectedParameters)
+            barContainer.visible = (selectedParameters.length > 0)
+
+            /// костыль
+            selectedParametersCount = selectedParameters.length
         }
     }
+
+ //   function getNameAndSignature(){
+ //       for(var param in outputFileContent["analog_params"]){
+ //           if(param.val)
+ //           outputFileContent["analog_params"][attrNumberInFile] = [selectedParam, barContainer.attributeIndex, barContainer.attributeSignature]
+ //       }
+ //   }
 }

@@ -15,9 +15,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     *.cpp \
-    *.qml
-
-#RESOURCES += qml.qrc
 
 HEADERS += *.h
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -32,4 +29,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    Footer.qml
+    *.qml \
+    About.qml \
+    EditingArea.qml \
+    InOutSettings.qml \
+    MenuDelegate.qml \
+    Mode.qml \
+    Tutorial.qml

@@ -1,2 +1,5 @@
 #ignore built files
 bin/*
+/WidgetsEditor/WidgetsEditor.pro.user
+/src/WidgetsEditor.pro.user
+/WidgetsEditor/WidgetsEditor.pro.user
