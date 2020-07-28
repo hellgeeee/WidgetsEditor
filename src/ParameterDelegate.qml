@@ -71,7 +71,7 @@ Item {
         Row {
             width: parent.width
             spacing: 8
-
+// то, что здесь закомменчено - раскомментить, если помимо атрибута выводить еще картинку и доп. инфо
 //            Column {
 //                visible: false
 //                Item {

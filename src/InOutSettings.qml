@@ -1,5 +1,4 @@
 import QtQuick 2.10
-//import QtQuick.Dialogs 1.0
 import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
 Item {
@@ -12,7 +11,6 @@ Item {
 
     visible: curentMode === Mode.EditingMode.IN_OUT_SETTINGS
     anchors.fill: parent
-
 
     AttributeFieldText{
         id: inFileNameInput
@@ -199,7 +197,6 @@ Item {
         req.open('GET', "file:///" + fileName, false)
         req.send()
         return req.status === 200
-
     }
 
     function readOutputFile(){

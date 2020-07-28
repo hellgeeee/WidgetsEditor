@@ -1,6 +1,6 @@
 /****************************************************************************
-** Copyright (C) 2017 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** Copyright (C) 2020 Integra-s.
+** Contact: olga.riazanova2011@ya.ru
 ****************************************************************************/
 
 import QtQuick 2.10

@@ -41,6 +41,7 @@ Rectangle{
         /// border
         Rectangle{
             id: delimiter
+
             width: stringHeight
             height: 1
         }
@@ -67,7 +68,7 @@ Rectangle{
         hoverEnabled: true
         onClicked: {
             curentMode = mode;
-            parent.parent.visible = false
+            parent.parent.visible = false // todo странно, посмотреть
         }
     }
 

@@ -32,7 +32,7 @@ Rectangle {
             font: appFont
         }
 
-        Item{width: smallGap; height: 1}
+        Item{ width: smallGap; height: 1 }
 
         Image {
             id: closeButton

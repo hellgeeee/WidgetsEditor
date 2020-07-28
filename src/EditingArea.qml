@@ -1,15 +1,10 @@
 import QtQuick 2.14
-import QtQuick.XmlListModel 2.0
-import QtQuick.Window 2.1
-import QtQuick.Controls 1.4
 import QtQuick.Controls 2.0
-import QtQuick.Layouts 1.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
-//import Qt.labs.platform 1.1 //for MessageDialog
 
 //todo разбить
-Item {//color: "#80f0f000"
+Item {
     id: editingArea
 
     property font appFont: deviceCategorySearch.font
@@ -26,12 +21,14 @@ Item {//color: "#80f0f000"
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
     anchors.fill: parent
+
     AttributeFieldText{
         id: deviceCategorySearch
 
         height: stringHeight
         anchors{
-           left: deviceCategories.left; right: deviceCategories.right
+           left: deviceCategories.left;
+           right: deviceCategories.right
         }
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
@@ -44,7 +41,10 @@ Item {//color: "#80f0f000"
 
        width: window.width * 0.25
        orientation: ListView.Vertical
-       anchors { top: deviceCategorySearch.bottom; bottom: parent.bottom}
+       anchors {
+           top: deviceCategorySearch.bottom;
+           bottom: parent.bottom
+       }
        maximumFlickVelocity: 5000
        model: typeof(widgetsEditorManager) !== "undefined" ? widgetsEditorManager.categories : null//typeof(deviceCategoriesModel) !== "undefined" ? deviceCategoriesModel : null
 
@@ -71,7 +71,6 @@ Item {//color: "#80f0f000"
             attributesContainer.visible = false
             fileEdit.text = ""
         }
-
     }
 
        ScrollLine {
@@ -81,7 +80,8 @@ Item {//color: "#80f0f000"
            scrollArea: deviceCategories;
            anchors {
                right: deviceCategories.right;
-               top: parent.top; bottom: parent.bottom
+               top: parent.top;
+               bottom: parent.bottom
            }
        }
 
@@ -138,34 +138,41 @@ Item {//color: "#80f0f000"
                right: categoriesParameters.right; left: categoriesParameters.left
                bottom: deviceCategories.bottom
            }
+
            TabBar {
               id: bar
+
               visible: parent.isEnoughRoomToShow
               rotation: 90
-              x: (-width + height )/ 2;
+              x: (-width + height )/ 2
               y: - x
               height: profilesBtn.height
                currentIndex: 0
                font: appFont
+
                TabButton {
                    id: profilesBtn
+
                    width: attributesContainer.height * 0.5
                    //height: width * 0.33;
                    text: qsTr("Текстовое")
                }
+
                TabButton {
-                   width: profilesBtn.width
                    id: filtersBtn
+
+                   width: profilesBtn.width
                    text: qsTr("Аналоговое")
                }
 
            }
            AttributesTab{
                id: attributeTab
+
                anchors {
                    fill: parent
-                    leftMargin: bar.height + smallGap
-                    topMargin: smallGap
+                   leftMargin: bar.height + smallGap
+                   topMargin: smallGap
                }
            }
        }
@@ -174,9 +181,9 @@ Item {//color: "#80f0f000"
            id: fileEditContainer
 
            anchors{
-            right: parent.right
-            top: deviceCategories.top
-            bottom: parent.bottom
+                right: parent.right
+                top: deviceCategories.top
+                bottom: parent.bottom
            }
            width: window.width * 0.3
            contentWidth: width;
@@ -270,27 +277,7 @@ Item {//color: "#80f0f000"
                console.debug("notBelongsTo Worked")
            }
        }
-
-       var enterInd = 0;
-       // with(fileEdit){ /// with позволяет заменить fileEdit.text => text
-           fileEdit.text = "ComplexWidget" + JSON.stringify(outFileContent, [], ' ')
-
-           /// приведение к красивому формату (может быть, это и не надо)
-           /// далее - оптимизировать! т.к. постоянно делать вставки из строки - очень затратно
-       //    while (enterInd >= 0){
-       //        enterInd = text.substring(enterInd).search(/\[\n( *)/, enterInd);
-       //        text = text.replace(/\[\n( *)/, "[")
-       //        text = text.replace(/\n( *)\]/, "]")
-       //    }
-       //
-       //    enterInd = 0;
-       //    while (enterInd >= 0){
-       //        enterInd = text.substring(enterInd).search(/,\n( *)/, enterInd);
-       //        text = text.replace(/,\n( *)/, ",")
-       //    }
-       // }
-       /// конец приведения к красивому формату
-
+       fileEdit.text = "ComplexWidget" + JSON.stringify(outFileContent, [], ' ')
    }
 
    function pause(duration){
@@ -301,3 +288,20 @@ Item {//color: "#80f0f000"
        return timer
    }
 }
+
+/// приведение к красивому формату (может быть, это и не надо)
+/// далее - оптимизировать! т.к. постоянно делать вставки из строки - очень затратно
+// with(fileEdit){ /// with позволяет заменить fileEdit.text => text
+//    while (enterInd >= 0){
+//        enterInd = text.substring(enterInd).search(/\[\n( *)/, enterInd);
+//        text = text.replace(/\[\n( *)/, "[")
+//        text = text.replace(/\n( *)\]/, "]")
+//    }
+//
+//    enterInd = 0;
+//    while (enterInd >= 0){
+//        enterInd = text.substring(enterInd).search(/,\n( *)/, enterInd);
+//        text = text.replace(/,\n( *)/, ",")
+//    }
+// }
+/// конец приведения к красивому формату

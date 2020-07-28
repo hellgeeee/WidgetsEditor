@@ -10,7 +10,8 @@ Item {
     Rectangle { anchors.fill: parent; color: "Black"; opacity: 0.3 }
 
     BorderImage {
-        width: smallGap; height: width * 2
+        width: smallGap;
+        height: width * 2
         y: scrollArea.visibleArea.yPosition * container.height;
         Rectangle{
             anchors.fill: parent;
