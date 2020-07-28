@@ -1,16 +1,10 @@
-Up and down btns in both lists 
-Multiple choosing +
-Screen output +
-
-Settings/grafical editing - text input is active +
-Settings/manual editing - text input is inactive +
-Settings/Input-output Settings - whole Window : Folder, File,
-Settings/getting started - whole window +
-Settings/about - whole window +
-
-Transfer to cpp
-Output in file from cpp
-
-Signature of fields, indexes and pics must be filled whet they are not empty
-Tooltips
-Active categories pics must change scale +
+{
+	"text_params": {
+		"0": [
+			"categoryName",
+			""
+		]
+	},
+	"analog_params": {},
+	"param_icons": {}
+}

@@ -30,7 +30,7 @@ Rectangle{
             id: menuItemIcon
             width: height
             height: parent.height - smallGap
-            source: "../rs/settings_gears.svg" // todo
+            source: "../rs/svg/settings_gears.svg" // todo
             ColorOverlay {
                 anchors.fill: parent
                 source: parent

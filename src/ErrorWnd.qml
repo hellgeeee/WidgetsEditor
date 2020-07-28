@@ -13,5 +13,6 @@ MessageDialog {
     function show(msg){
         visible = true
         text = msg
+        errorSound.play()
     }
 }

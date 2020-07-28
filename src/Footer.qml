@@ -36,7 +36,7 @@ Rectangle {
 
         Image {
             id: closeButton
-            source: "../rs/close-button.svg"
+            source: "../rs/svg/close-button.svg"
             height: parent.height
             width: height
 

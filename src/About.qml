@@ -13,7 +13,7 @@ Column {
        textFormat: Text.StyledText
        text: qsTr(
            '<b>Название компонента:</b>
-           Редактор виджетов <br><br>
+           Редактор виджетов для ' + Qt.platform.os + '<br><br>
            <b>Контакты разработчика</b>: Ольга Рязанова, olga.riazanova2011@ya.ru<br>'
        )
        onLinkActivated: Qt.openUrlExternally(link)

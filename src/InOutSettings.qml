@@ -1,6 +1,8 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
+import QtMultimedia 5.12
+
 Item {
     id: inOutSettings
 
@@ -27,7 +29,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/file.svg"
+            source: "../rs/svg/file.svg"
 
             MouseArea {
                 id: selectFileButton
@@ -61,7 +63,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/file.svg"
+            source: "../rs/svg/file.svg"
 
             MouseArea {
                 id: outFileButton
@@ -97,7 +99,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/file.svg"
+            source: "../rs/svg/file.svg"
 
             MouseArea {
                 id: widgetsExistFileButton
@@ -146,7 +148,7 @@ Item {
     Image {
         id: saveButton
 
-        source: "../rs/download-symbol.svg"
+        source: "../rs/svg/download-symbol.svg"
         height: stringHeight
         width: height
         rotation: -90
@@ -171,15 +173,14 @@ Item {
     }
 
     function save(){
-
         /// проверка существования всех файлов ввода-вывода
-        if(!doesFileExist(inFileName) || !doesFileExist(outFileName) || (widgetsExistFileName !== "" && !doesFileExist(widgetsExistFileName)) ){ // todo
+        if(!doesFileExist(inFileName) || !doesFileExist(outFileName) || (widgetsExistFileName !== "" && !doesFileExist(widgetsExistFileName)) ){
             errorWnd.show(qsTr("Ошибка, один из файлов не был найден. Пожалуйста проверьте правильность ввода пути и имени файла или создайте такой файл"))
             return
         }
 
         /// передача имен файлов в c++
-        /// внимание, необязательный файл считывается первым. Иначе парс из сеттеров обязательных произойдет без него
+        /// внимание, необязательный файл widgetsExistFileName надо считывать первым. Иначе парс из сеттеров обязательных файлов произойдет без него
         widgetsEditorManager.widgetsExistFileName = widgetsExistFileName
         widgetsEditorManager.inFileName = inFileName /// чтение входного файла мы производим на стороне с++, т.к. скорость важна
         widgetsEditorManager.outFileName = outFileName
@@ -190,6 +191,8 @@ Item {
         editingArea.deviceCategoriesModel = widgetsEditorManager.categories
 
         readOutputFile() /// чтение выходного файла мы производим на стороне qml, т.к. скорость не важна
+
+        doneSound.play()
     }
 
     function doesFileExist(fileName) {

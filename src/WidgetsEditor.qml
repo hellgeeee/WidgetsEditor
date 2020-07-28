@@ -9,6 +9,10 @@ import QtQuick.Window 2.1
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Extras 1.4
+import QtMultimedia 5.12
+
+
 
 import "./"
 
@@ -41,12 +45,31 @@ Item {
     About{id: about}
     ErrorWnd{id: errorWnd}
 
+    MediaPlayer{
+        id: errorSound
+        source: "../rs/mp3/error_but_funny2.mp3"
+    }
+    MediaPlayer{
+        id: successSound
+        source: "../rs/mp3/success.mp3"
+    }
+    MediaPlayer{
+        id: doneSound
+        source: "../rs/mp3/done.mp3"
+        volume: 0.5
+    }
+    MediaPlayer{
+        id: closeSound
+        source: "../rs/mp3/widget_closed.mp3"
+        volume: 0.5
+    }
+
     Image {
         id: settingsButton
 
-        source: "../rs/settings_gears.svg"
+        source: "../rs/svg/settings_gears.svg"
         smooth: true
-        height: stringHeight - smallGap
+        height: stringHeight
         width: height
         anchors {
             top: closeButton.top
@@ -67,68 +90,76 @@ Item {
         }
     }
 
-    Image {
+    DelayButton{
         id: saveButton
 
         visible: curentMode === Mode.EditingMode.GRAPHIC_EDITING ||
                  curentMode === Mode.EditingMode.TEXT_EDITING
-        source: "../rs/file.svg"
-        height: stringHeight - smallGap
+        enabled: checked === false
+
+        height: stringHeight
         width: height
         anchors {
             top: closeButton.top
             right: closeButton.left
             rightMargin: width
         }
+        delay: 1000
 
-        MouseArea {
-            id: maSave
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked:{
+        onHoveredChanged: infoTooltip.visible = !infoTooltip.visible
+        onActivated: {
 
-                switch(curentMode) {
-                    case Mode.EditingMode.GRAPHIC_EDITING:
-                        ///editingArea.paramsToJson()
-                        if(editingArea.outputFileText === '' ||
-                            editingArea.outputFileText ===
-                            '"text_params": {},
-                            "analog_params": {},
-                            "param_icons": {}'){
-                            errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла"))
-                            return
-                        }
-                        console.time("1")
-                        widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
-                    break
+            /// хотим, чтобы после клика кнопка немного помигала. Показывая, что в файл идет запись
+            pause(3000).triggered.connect(function () {checked = false})
 
-                    case Mode.EditingMode.TEXT_EDITING:
-                        try {
-                            outFileContent = JSON.parse(editingArea.outputFileText)
-                            widgetsEditorManager.outFileContent = outFileContent
-                            print("write file Without mistake")
-                        } catch(e) {
-                            print("write file mistake")
-                            errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
-                        }
-                    break
+            switch(curentMode) {
+                case Mode.EditingMode.GRAPHIC_EDITING:
+                    ///editingArea.paramsToJson()
+                    if(editingArea.outputFileText === '' ||
+                        editingArea.outputFileText ===
+                        '"text_params": {},
+                        "analog_params": {},
+                        "param_icons": {}'){
+                        errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла"))
+                        return
+                    }
+                    console.time("1")
+                    widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
+                break
 
-                  default:
-                    break
-                }
-           }
+                case Mode.EditingMode.TEXT_EDITING:
+                    try {
+                        outFileContent = JSON.parse(editingArea.outputFileText)
+                        widgetsEditorManager.outFileContent = outFileContent
+                        print("write file Without mistake")
+                    } catch(e) {
+                        print("write file mistake")
+                        errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
+                    }
+                break
+
+              default:
+                break
+            }
+            successSound.play()
+
+        }
+
+        Rectangle{anchors.fill: parent; anchors.margins: 1; radius: width * 0.5;
+            Image {source: "../rs/svg/download-symbol.svg"; anchors.fill: parent}
         }
 
         ToolTip{
-            visible: maSave.containsMouse
-            text: "Сорханить изменения";
+            id: infoTooltip
+            text: "Удерживайте, чтобы сорханить изменения во внешнюю память";
             y: stringHeight
         }
+        //
     }
 
     Image {
         id: closeButton
-        source: "../rs/close-button.svg"
+        source: "../rs/svg/close-button.svg"
         height: stringHeight - smallGap
         width: height
         anchors{
@@ -141,10 +172,17 @@ Item {
             id: maClose
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: if(curentMode === Mode.EditingMode.ABOUT || curentMode === Mode.EditingMode.TUTORIAL)
-                           curentMode = Mode.EditingMode.GRAPHIC_EDITING
-                       else
-                           Qt.quit()
+            onClicked:
+                if(curentMode === Mode.EditingMode.ABOUT
+                    || curentMode === Mode.EditingMode.TUTORIAL
+                    || curentMode === Mode.EditingMode.SETTINGS
+                    || curentMode === Mode.EditingMode.IN_OUT_SETTINGS)
+                       curentMode = Mode.EditingMode.GRAPHIC_EDITING
+                    else{
+                       window.visible = false
+                       pause(1200).triggered.connect(function () {Qt.quit()})
+                       closeSound.play();
+                    }
         }
 
         ToolTip{
@@ -153,6 +191,8 @@ Item {
             y: stringHeight
         }
     }
+
+
 
     function findAvailableParamsIntersection (){
         if(selectedCategories.length === 0 ){
@@ -184,5 +224,14 @@ Item {
             intersection = intersectionCur
         }
         return intersection
+    }
+
+    /// отсрочка для выполнения определенных действий (остальные действия она не тормозит)
+    function pause(duration){
+        var timer = Qt.createQmlObject("import QtQuick 2.0; Timer {}", editingArea);
+        timer.interval = duration;
+        timer.repeat = false;
+        timer.start()
+        return timer
     }
 }

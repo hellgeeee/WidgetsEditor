@@ -19,7 +19,7 @@ Rectangle {
     Image {
         id: categoryIcon
         anchors.fill: parent
-        source: "../rs/settings_gears.svg"
+        source: "../rs/svg/settings_gears.svg"
         ColorOverlay {
             anchors.fill: parent
             source: parent

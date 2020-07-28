@@ -40,11 +40,12 @@ Item {
        id: deviceCategories
 
        width: window.width * 0.25
-       orientation: ListView.Vertical
        anchors {
            top: deviceCategorySearch.bottom;
            bottom: parent.bottom
        }
+       orientation: ListView.Vertical
+
        maximumFlickVelocity: 5000
        model: typeof(widgetsEditorManager) !== "undefined" ? widgetsEditorManager.categories : null//typeof(deviceCategoriesModel) !== "undefined" ? deviceCategoriesModel : null
 
@@ -63,9 +64,13 @@ Item {
             selectedParametersCount = 0
             curentParameters = []
 
-            /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво
+            /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво            
+            /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
             deviceCategories.flick(0, deviceCategories.maximumFlickVelocity)
-            pause(1000).triggered.connect(function () { deviceCategories.model = deviceCategories.model })
+            pause(500).triggered.connect(function () {
+                deviceCategories.model = []
+                deviceCategories.model = widgetsEditorManager.categories
+            })
 
             /// костыль! должно обновиться автоматически
             attributesContainer.visible = false
@@ -108,7 +113,12 @@ Item {
 
                    /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво, т.е. список успевал колыхнуться
                    categoriesParameters.flick(0, categoriesParameters.maximumFlickVelocity)
-                   pause(800).triggered.connect(function () { print("triggered " + selectedParameters);categoriesParameters.model = curentParameters })
+                   pause(500).triggered.connect(function () {
+
+                       /// костыль: обновление внешнего вида модели не происходит естественным путем почему-то
+                       categoriesParameters.model = [];
+                       categoriesParameters.model = curentParameters
+                   })
 
                    /// костыль!
                    attributesContainer.visible = false
@@ -278,14 +288,6 @@ Item {
            }
        }
        fileEdit.text = "ComplexWidget" + JSON.stringify(outFileContent, [], ' ')
-   }
-
-   function pause(duration){
-       var timer = Qt.createQmlObject("import QtQuick 2.0; Timer {}", editingArea);
-       timer.interval = duration;
-       timer.repeat = false;
-       timer.start()
-       return timer
    }
 }
 

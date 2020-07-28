@@ -109,7 +109,7 @@ Item{
    Image {
        id: saveButton
 
-       source: "../rs/download-symbol.svg"
+       source: "../rs/svg/download-symbol.svg"
        height: stringHeight - smallGap
        width: height
        rotation: -90
@@ -122,12 +122,15 @@ Item{
            id: ma
            anchors.fill: parent
            hoverEnabled: true
-           onClicked: editingArea.paramsToJson();
+           onClicked: {
+               editingArea.paramsToJson()
+               doneSound.play()
+           }
        }
 
        ToolTip{
            visible: ma.containsMouse
-           text: "Сорханить атрибут";
+           text: "Сорханить атрибуты";
            y: stringHeight
        }
    }

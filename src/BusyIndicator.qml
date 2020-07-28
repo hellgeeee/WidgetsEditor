@@ -1,7 +1,7 @@
 import QtQuick 2.10
 
 Image { // todo наверное это не надо
-    source: "../rs/settings_gears.svg"
+    source: "../rs/svg/settings_gears.svg"
     height: stringHeight
     width: height
     NumberAnimation on rotation {
