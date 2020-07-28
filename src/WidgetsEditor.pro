@@ -1,4 +1,4 @@
-QT += quick
+QT += quick widgets
 
 CONFIG += c++11
 
@@ -30,8 +30,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     *.qml \
+    ../test/tesCaseTimeOfAnswer.qml \
+    ../test/testCaseAttributesSelecting.qml \
     About.qml \
     EditingArea.qml \
+    ErrorWnd.qml \
     InOutSettings.qml \
     MenuDelegate.qml \
     Mode.qml \

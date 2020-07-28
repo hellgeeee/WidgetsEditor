@@ -3,7 +3,7 @@ import QtQuick 2.10
 Column{
     id: col
 
-    visible: curentMode === Mode.EditingMode.NONE
+    visible: curentMode === Mode.EditingMode.SETTINGS
     anchors{
         fill: parent
         margins: stringHeight

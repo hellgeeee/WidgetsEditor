@@ -1,12 +1,11 @@
 import QtQuick 2.10
 
-Image {
-    id: container
+Image { // todo наверное это не надо
     source: "../rs/settings_gears.svg"
     height: stringHeight
     width: height
     NumberAnimation on rotation {
-        running: container.visible
+        running: parent.visible
         from: 0; to: 360;
         loops: Animation.Infinite;
         duration: 1200

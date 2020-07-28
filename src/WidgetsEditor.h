@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 
+#include<QDebug>
 
 class CategoryParameter : public QObject{
     Q_OBJECT
@@ -48,19 +49,54 @@ signals:
     void attributesChanged();
 };
 
-class OutputAcceptor : public QObject{
+class WidgetsEditorManager : public QObject{
     Q_OBJECT
-public:
-    struct FileForCategories{
-        QString fileName;
-        QList<QString> deviceCategories;
-        QJsonObject* fileContent;
-    };
 
-    OutputAcceptor(QObject* parent = nullptr) : QObject(parent) {}
+    Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
+    Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
+    Q_PROPERTY(QString widgetsExistFileName READ widgetsExistFileName WRITE setWidgetsExistFileName NOTIFY widgetsExistFileNameChanged)
+    Q_PROPERTY(QVariant categories READ categories NOTIFY categoriesChanged)
+    Q_PROPERTY(QString outFileContent WRITE setOutFileContent NOTIFY outFileContentChanged)
+
+public:
+    WidgetsEditorManager(QObject* parent = nullptr) : QObject(parent) {}
+
+    QString inFileName(){ return _inFileName; }
+
+    void setInFileName(const QString& val){
+        _inFileName = val;
+        _categories = parse();
+    }
+
+    QString outFileName(){ return _outFileName; }
+
+    void setOutFileName(const QString& val){
+        _outFileName = val;
+    }
+
+    QString widgetsExistFileName(){ return _widgetsExistFileName; }
+
+    void setWidgetsExistFileName(const QString& val){
+        _widgetsExistFileName = val;
+        qDebug() << "setter in cpp" + val + "___" + _widgetsExistFileName;
+    }
+
+    QVariant categories(){ return QVariant::fromValue(_categories); }
+    void setCategories(QList<QObject*>);
+    void setOutFileContent(const QString&);
+
 private:
-    QList<FileForCategories> filesForCategories;
-public slots:
-    void onWidgetChanged(const QJsonObject&);
+    QList<QObject*> parse();
+    QString _inFileName{ "" };
+    QString _outFileName{ "" };
+    QString _widgetsExistFileName{ "" };
+    QList<QObject*> _categories;
+    QString _outFileContent{ "" };
+signals:
+    void inFileChanged();
+    void outFileChanged();
+    void outFileContentChanged();
+    void widgetsExistFileNameChanged();
+    void categoriesChanged();
 };
 #endif // WIDGETSEDITOR_H

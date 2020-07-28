@@ -1,13 +1,12 @@
 import QtQuick 2.10
 
 Column {
-    id: about
-
     visible: curentMode === Mode.EditingMode.ABOUT
     anchors.fill: parent
 
-    /// stands for topmargin
+    /// верхний отступ
     Item{height: parent.height * 0.25; width: 1}
+
     Text{
        id: textPrime
        anchors.horizontalCenter: parent.horizontalCenter
@@ -19,6 +18,7 @@ Column {
        )
        onLinkActivated: Qt.openUrlExternally(link)
     }
+
     Text{
        anchors.left: textPrime.left
        textFormat: Text.StyledText
@@ -31,6 +31,7 @@ Column {
         )
        onLinkActivated: Qt.openUrlExternally(link)
     }
+
     Text{
        anchors.left: textPrime.left
        textFormat: Text.StyledText
@@ -40,7 +41,6 @@ Column {
             <a href="http://wiki.integra-s.com:11111/index.php/%D0%98%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0-%D0%A1">
             Схема взаимодействия с пользователем</a></html><br>'
        )
-       // <html><style type="text/css"></style><a href="http://wiki.integra-s.com:11111/index.php/%D0%98%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0-%D0%A1">http://wiki.integra-s.com</a></html>' )
        onLinkActivated: Qt.openUrlExternally(link)
     }
 }

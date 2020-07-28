@@ -5,12 +5,7 @@ Item {
 
     property variant scrollArea
 
-    opacity: 0.1
-
-    function size()
-    {
-      return (scrollArea.visibleArea.heightRatio + scrollArea.visibleArea.yPosition) * container.height;
-    }
+    opacity: 0
 
     Rectangle { anchors.fill: parent; color: "Black"; opacity: 0.3 }
 

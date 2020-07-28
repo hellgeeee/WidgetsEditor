@@ -51,54 +51,53 @@
 import QtQuick 2.2
 
 Item {
-    id: delegateCont
+    id: delegate
 
     property int numberAmongSelected: -1//ListView.isCurrentItem
-    property var parameter: curentParameters[index]
 
     property int parameterIndex: 0
     property string parameterSignature: ""
 
-    width: parent.width;
-    height: 100 // todo make width dependent on content
+    width: 100;
+    height: 50 // todo make width dependent on content
+
+    scale: selectedParameters.indexOf(index) >= 0 ? 1 : 0.75
+    Behavior on scale { PropertyAnimation { duration: 300 } }
 
     Column {
         anchors.fill: parent
         spacing: smallGap
 
-        Item { height: smallGap; width: parent.width }
-
         Row {
             width: parent.width
             spacing: 8
 
-            Column {
-                Item {
-                    width: smallGap * 0.5
-                    height: titleText.font.pixelSize * 0.25
-                }
+//            Column {
+//                visible: false
+//                Item {
+//                    width: smallGap * 0.5
+//                    height: titleText.font.pixelSize * 0.25
+//                }
 
-                Image {
-                    id: titleImage
-                    visible: source !== ""
-                    source: parameter.image !== "" ? parameter.image : ""
-                }
-            }
+//                Image {
+//                    id: titleImage
+//                    visible: false//source !== ""
+//                    source: parameter.image !== "" ? parameter.image : ""
+//                }
+//            }
 
             Text {
                 id: titleText
                 anchors.leftMargin: stringHeight
-                color: numberAmongSelected >= 0 ? "#000000" : "#303030"
-                scale: numberAmongSelected >= 0 ? 1.5 : 1.0
-                text: parameter.name
+                color: selectedParameters.indexOf(index) >= 0 ? "#000000" : "#303030"
+                text: typeof(curentParameters[index]) !== "undefined" ? curentParameters[index].name : ""
                 wrapMode: Text.WordWrap
-                font {pixelSize: appFont.pixelSize; bold: true}
+                font {pixelSize: appFont.pixelSize * 1.5; bold: true}
                 Behavior on color { ColorAnimation { duration: 150 } }
-                Behavior on scale { PropertyAnimation { duration: 300 } }
             }
         }
 
-        Text {
+/*        Text {
             width: parent.width
             font.pixelSize: appFont.pixelSize * 0.8
             textFormat: Text.RichText
@@ -113,16 +112,20 @@ Item {
             font.pixelSize: 14
             textFormat: Text.StyledText
             horizontalAlignment: Qt.AlignLeft
-        }
+        }*/
     }
 
     MouseArea {
         anchors.fill: parent
+        scale: 1.5
         onClicked: {
             numberAmongSelected = onItemClicked(index, selectedParameters)
-            barContainer.visible = (selectedParameters.length > 0)
+            attributesContainer.visible = (selectedParameters.length > 0)
+
 
             /// костыль
+            titleText.color = numberAmongSelected >= 0 ? "#000000" : "#303030"
+            delegate.scale = numberAmongSelected >= 0 ? 1.0 : 0.75
             selectedParametersCount = selectedParameters.length
         }
     }

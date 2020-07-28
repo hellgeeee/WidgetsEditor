@@ -4,15 +4,14 @@ import QtGraphicalEffects 1.0 // for ColorOverlay
 Rectangle {
     id: delegate
 
-    property int itemSize
     property int numberAmongSelected: -1 //ListView.isCurrentItem
-    property color delegateColor: numberAmongSelected >= 0 ? "#000000" : "#303030"
+    property color delegateColor: selectedCategories.indexOf(index) >= 0 ? "#000000" : "#303030"
 
     Behavior on scale { PropertyAnimation { duration: 300 } }
     Behavior on delegateColor { ColorAnimation { duration: 150 } }
 
-    visible: model.name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
-    scale: numberAmongSelected >= 0 ? 1.0 : 0.75//0.75
+    visible: widgetsEditorManager.categories[index].name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
+    scale: selectedCategories.indexOf(index) >= 0 ? 1.0 : 0.75
     width: visible ? parent.width: 0
     height: width
     anchors.horizontalCenter: parent.horizontalCenter
@@ -42,7 +41,7 @@ Rectangle {
             family: appFont.family;
             bold: true;
         }
-        text: name
+        text: widgetsEditorManager.categories[index].name
         color: delegateColor
     }
 
@@ -54,16 +53,20 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-//
-////print(selectedCategories + ", cur ind: " + index + ", it's number in array: " + selectedCategories.indexOf(index) + ", length:" + selectedCategories.length)
             numberAmongSelected = onItemClicked(index, selectedCategories)
+
+            /// костыль: не обновляется автоматически
+            delegateColor = numberAmongSelected >=0 ? "#000000" : "#303030"
+            delegate.scale = numberAmongSelected >= 0 ? 1.0 : 0.75
+            selectedCategoriesCount = selectedCategories.length
 
             curentParameters = findAvailableParamsIntersection()
             selectedParameters = []
+            selectedParametersCount = 0
 
-            /// костыль: почему-то не обновляется автоматически
-            selectedParametersCount = selectedParameters.length
-            selectedCategoriesCount = selectedCategories.length
+            // костыль
+            categoriesParameters.model = curentParameters
+            attributesContainer.visible = curentParameters.length > 0
         }
     }
 

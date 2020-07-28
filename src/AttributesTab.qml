@@ -1,14 +1,18 @@
 import QtQuick 2.2
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
+import QtQuick.Controls.Styles 1.4 // for spinbox style
 
 Item{
    id : attributesTab
 
-   property string attributeIndexValue: attributeIndex.text
-   property string attributeSignatureValue: attributeSignature.text
+   property alias attributeIndexValue: attributeIndex.value
+   property alias attributeSignatureValue: attributeSignature.text
+   property alias attributeUpperBondary: upperBondary.checked
+   property alias attributeLowerBondary: lowerBondary.checked
+   property alias attributeIcon: attributeIcon.text
 
-   visible: barContainer.isEnoughRoomToShow
+   visible: attributesContainer.isEnoughRoomToShow && selectedParameters != []
    enabled: curentMode === Mode.EditingMode.GRAPHIC_EDITING
 
    AttributeFieldPre{
@@ -21,14 +25,14 @@ Item{
        text: qsTr("Индекс поля*")
    }
 
-   AttributeFieldText{
+   SpinBox{
        id : attributeIndex
 
-       anchors {
-           top: parent.top
-           left: attributeIndexPrefix.right; right: parent.right
-       }
-       placeholderText: qsTr("Число до восьми знаков")
+       anchors.left: attributeSignature.left
+       width: attributeSignature.width
+       height: font.pixelSize * 2 +1
+       font: appFont
+       editable: true
    }
 
    AttributeFieldPre{
@@ -50,7 +54,6 @@ Item{
        placeholderText: qsTr("Любые символы до 255 знаков")
    }
 
-
    /// следующие два атрибута должны появляться лишь в случае, если поле аналоговое, т.е. выбрана вкладка bar.currentIndex == 1
    AttributeFieldPre{
        id: isShowBondariesPrefix
@@ -59,7 +62,7 @@ Item{
            left: attributeIndexPrefix.left
            verticalCenter: isShowBondaries.verticalCenter
        }
-       text: qsTr("Показывать границы")
+       text: qsTr("Показывать границы *")
    }
 
    RowLayout {
@@ -77,6 +80,7 @@ Item{
            font: appFont
        }
        CheckBox {
+           id: lowerBondary
            text: qsTr("▼")
            font: appFont
        }
@@ -84,7 +88,7 @@ Item{
 
    AttributeFieldPre{
        id: attributeIconPrefix
-       visible: bar.currentIndex == 1
+       visible: bar.currentIndex === 1
        anchors {
            left: attributeIndexPrefix.left
            verticalCenter: attributeIcon.verticalCenter
@@ -94,7 +98,7 @@ Item{
 
    AttributeFieldText{
        id : attributeIcon
-       visible: bar.currentIndex == 1
+       visible: bar.currentIndex === 1
        anchors{
            top: isShowBondaries.bottom
            left: attributeIconPrefix.right; right: parent.right
@@ -105,7 +109,6 @@ Item{
    Image {
        id: saveButton
 
-       visible: attributeIndex.text.length > 0
        source: "../rs/download-symbol.svg"
        height: stringHeight - smallGap
        width: height
@@ -116,9 +119,16 @@ Item{
        }
 
        MouseArea {
+           id: ma
            anchors.fill: parent
-           onClicked: with(editingArea){ paramsToJson(); transferParamsToList() }
+           hoverEnabled: true
+           onClicked: editingArea.paramsToJson();
+       }
+
+       ToolTip{
+           visible: ma.containsMouse
+           text: "Сорханить атрибут";
+           y: stringHeight
        }
    }
-
 }
