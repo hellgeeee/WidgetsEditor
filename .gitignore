@@ -3,3 +3,10 @@ bin/*
 /WidgetsEditor/WidgetsEditor.pro.user
 /src/WidgetsEditor.pro.user
 /WidgetsEditor/WidgetsEditor.pro.user
+/src/.qmake.stash
+/src/debug/moc_predefs.h
+/src/debug/moc_WidgetsEditor.cpp
+/src/debug/moc_WidgetsEditor.o
+/src/release/moc_predefs.h
+/src/release/moc_WidgetsEditor.cpp
+/src/release/moc_WidgetsEditor.o

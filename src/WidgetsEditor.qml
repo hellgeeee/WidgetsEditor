@@ -80,7 +80,12 @@ Item {
             id: ma
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: curentMode = curentMode!== Mode.EditingMode.SETTINGS ? Mode.EditingMode.SETTINGS : Mode.EditingMode.GRAPHIC_EDITING
+            onClicked: {
+                curentMode = (curentMode!== Mode.EditingMode.SETTINGS ? Mode.EditingMode.SETTINGS : Mode.EditingMode.GRAPHIC_EDITING)
+
+                /// костыль, почему-то не обновляется само собой
+                menu.visible = curentMode === Mode.EditingMode.SETTINGS
+            }
         }
 
         ToolTip{
