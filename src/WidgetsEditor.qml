@@ -14,8 +14,6 @@ import QtMultimedia 5.12
 
 
 
-import "./"
-
 Item {
     id: window
 
@@ -47,27 +45,27 @@ Item {
 
     MediaPlayer{
         id: errorSound
-        source: "../rs/mp3/error_but_funny2.mp3"
+        source: "qrc:/../rs/mp3/error_but_funny2.mp3"
     }
     MediaPlayer{
         id: successSound
-        source: "../rs/mp3/success.mp3"
+        source: "qrc:/../rs/mp3/success.mp3"
     }
     MediaPlayer{
         id: doneSound
-        source: "../rs/mp3/done.mp3"
+        source: "qrc:/../rs/mp3/done.mp3"
         volume: 0.5
     }
     MediaPlayer{
         id: closeSound
-        source: "../rs/mp3/widget_closed.mp3"
+        source: "qrc:/../rs/mp3/widget_closed.mp3"
         volume: 0.5
     }
 
     Image {
         id: settingsButton
 
-        source: "../rs/svg/settings_gears.svg"
+        source: "qrc:/../rs/svg/settings_gears.svg"
         smooth: true
         height: stringHeight
         width: height
@@ -136,9 +134,7 @@ Item {
                     try {
                         outFileContent = JSON.parse(editingArea.outputFileText)
                         widgetsEditorManager.outFileContent = outFileContent
-                        print("write file Without mistake")
                     } catch(e) {
-                        print("write file mistake")
                         errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
                     }
                 break
@@ -151,7 +147,7 @@ Item {
         }
 
         Rectangle{anchors.fill: parent; anchors.margins: 1; radius: width * 0.5;
-            Image {source: "../rs/svg/download-symbol.svg"; anchors.fill: parent}
+            Image {source: "qrc:/../rs/svg/download-symbol.svg"; anchors.fill: parent}
         }
 
         ToolTip{
@@ -211,7 +207,7 @@ Item {
         /// a1 ^ a2 = aRez
         /// aRez ^ a3 = aRez
         /// aRez ^ a4 = aRez ...
-        var intersection = widgetsEditorManager.categories[selectedCategories[0]].attributes
+        var intersection = widgetsEditorManager.categories[selectedCategories[0]].parameters
         for(var catCompNum = 1; catCompNum < selectedCategories.length; catCompNum++){
             var intersectionCur = []
             var attributesComp = widgetsEditorManager.categories[selectedCategories[catCompNum]].attributes//deviceCategoriesModel[selectedCategories[catCompNum]].attributes
@@ -231,6 +227,36 @@ Item {
         return intersection
     }
 
+    function resetParam(paramNum){
+        curentParameters[paramNum].indexCur = -1
+        curentParameters[paramNum].signatureCur = ""
+        curentParameters[paramNum].upperBoundaryCur = false
+        curentParameters[paramNum].lowerBoundaryCur = false
+        curentParameters[paramNum].imageCur = ""
+        curentParameters[paramNum].representType = -1
+        editingArea.parametersList.itemAtIndex(paramNum).image = ""
+        editingArea.parametersList.itemAtIndex(paramNum).description = ""
+    }
+
+    function writeParamFromGui(paramNum){
+        curentParameters[paramNum].indexCur = editingArea.attributesTab.attributeIndex
+        curentParameters[paramNum].signatureCur = editingArea.attributesTab.attributeSignature
+        curentParameters[paramNum].representType = editingArea.attributesContainer.mode
+        editingArea.parametersList.itemAtIndex(paramNum).description =
+            curentParameters[paramNum].indexCur !== -1 ?
+                qsTr("Параметр " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
+                " с индексом " + editingArea.attributesTab.attributeIndex +
+                " и подписью \"" + editingArea.attributesTab.attributeSignature + "\" ") :
+                ""
+        if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
+            curentParameters[paramNum].upperBoundaryCur = editingArea.attributesTab.attributeUpperBondary
+            curentParameters[paramNum].lowerBoundaryCur = editingArea.attributesTab.attributeLowerBondary
+            curentParameters[paramNum].imageCur = editingArea.attributesTab.attributeIcon
+            editingArea.parametersList.itemAtIndex(paramNum).image = Qt.resolvedUrl("../rs/svg/" + curentParameters[paramNum].imageCur + ".svg")
+        }
+    }
+
+
     /// отсрочка для выполнения определенных действий (остальные действия она не тормозит)
     function pause(duration){
         var timer = Qt.createQmlObject("import QtQuick 2.0; Timer {}", editingArea);
@@ -240,3 +266,4 @@ Item {
         return timer
     }
 }
+

@@ -6,8 +6,8 @@ import QtQuick.Controls.Styles 1.4 // for spinbox style
 Item{
    id : attributesTab
 
-   property alias attributeIndexValue: attributeIndex.value
-   property alias attributeSignatureValue: attributeSignature.text
+   property alias attributeIndex: attributeIndex.value
+   property alias attributeSignature: attributeSignature.text
    property alias attributeUpperBondary: upperBondary.checked
    property alias attributeLowerBondary: lowerBondary.checked
    property alias attributeIcon: attributeIcon.text
@@ -109,7 +109,7 @@ Item{
    Image {
        id: saveButton
 
-       source: "../rs/svg/download-symbol.svg"
+       source: "qrc:/../rs/svg/download-symbol.svg"
        height: stringHeight - smallGap
        width: height
        rotation: -90
@@ -123,6 +123,7 @@ Item{
            anchors.fill: parent
            hoverEnabled: true
            onClicked: {
+               writeParamFromGui(selectedParameters[selectedParametersCount - 1])
                editingArea.paramsToJson()
                doneSound.play()
            }

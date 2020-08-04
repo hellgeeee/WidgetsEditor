@@ -29,7 +29,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/svg/file.svg"
+            source: "qrc:/../rs/svg/file.svg"
 
             MouseArea {
                 id: selectFileButton
@@ -63,7 +63,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/svg/file.svg"
+            source: "qrc:/../rs/svg/file.svg"
 
             MouseArea {
                 id: outFileButton
@@ -99,7 +99,7 @@ Item {
                 margins: smallGap * 0.5
             }
             width: height
-            source: "../rs/svg/file.svg"
+            source: "qrc:/../rs/svg/file.svg"
 
             MouseArea {
                 id: widgetsExistFileButton
@@ -123,7 +123,7 @@ Item {
     FileDialog {
         id: fileDialog
         title: qsTr("Выбор текстового файла")
-        folder: "../doc"
+        folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
         nameFilters: [ "Text files (*.txt *.js *json)", "All files (*)" ]
         onAccepted:
             switch(fileChoosingMode){
@@ -148,7 +148,7 @@ Item {
     Image {
         id: saveButton
 
-        source: "../rs/svg/download-symbol.svg"
+        source: "qrc:/../rs/svg/download-symbol.svg"
         height: stringHeight
         width: height
         rotation: -90
@@ -184,11 +184,10 @@ Item {
         widgetsEditorManager.widgetsExistFileName = widgetsExistFileName
         widgetsEditorManager.inFileName = inFileName /// чтение входного файла мы производим на стороне с++, т.к. скорость важна
         widgetsEditorManager.outFileName = outFileName
-        print("qml widgetsExistFileName: " + widgetsEditorManager.widgetsExistFileName)
 
         /// установка режима редактирования
         curentMode = Mode.EditingMode.GRAPHIC_EDITING
-        editingArea.deviceCategoriesModel = widgetsEditorManager.categories
+        editingArea.deviceCategoriesList.model = widgetsEditorManager.categories
 
         readOutputFile() /// чтение выходного файла мы производим на стороне qml, т.к. скорость не важна
 

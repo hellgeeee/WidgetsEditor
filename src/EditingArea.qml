@@ -10,13 +10,10 @@ Item {
     property font appFont: deviceCategorySearch.font
     property int prefixWidth: attributesContainer.width * 0.3
 
-    property alias attributeIndex: attributeTab.attributeIndexValue
-    property alias attributeSignature: attributeTab.attributeSignatureValue
-    property alias attributeUpperBondary: attributeTab.attributeUpperBondary
-    property alias attributeLowerBondary: attributeTab.attributeLowerBondary
-    property alias attributeIcon: attributeTab.attributeIcon
     property alias attributesContainer: attributesContainer
-    property alias deviceCategoriesModel: deviceCategories.model
+    property alias attributesTab: attributesTab
+    property alias deviceCategoriesList: deviceCategoriesList
+    property alias parametersList: parametersList
     property alias outputFileText: fileEdit.text
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
@@ -27,8 +24,8 @@ Item {
 
         height: stringHeight
         anchors{
-           left: deviceCategories.left;
-           right: deviceCategories.right
+           left: deviceCategoriesList.left;
+           right: deviceCategoriesList.right
         }
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
@@ -37,7 +34,7 @@ Item {
     }
 
     ListView {
-       id: deviceCategories
+       id: deviceCategoriesList
 
        width: window.width * 0.25
        anchors {
@@ -54,8 +51,8 @@ Item {
 
     Footer{
         selectedItemsCount: selectedCategoriesCount
-        availableItemsCount: (typeof(deviceCategoriesModel) !== "undefined" && deviceCategoriesModel !== null) ? deviceCategoriesModel.length : 0
-        width: deviceCategories.width
+        availableItemsCount: (typeof(deviceCategoriesList.model) !== "undefined" && deviceCategoriesList.model !== null) ? deviceCategoriesList.model.length : 0
+        width: deviceCategoriesList.width
         opacity: area.containsMouse || closeBtn.containsMouse? 0.3 : deviceCategoriesScroll.opacity * 0.3
         closeBtn.onClicked: {
             selectedCategories = []
@@ -66,10 +63,10 @@ Item {
 
             /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво            
             /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
-            deviceCategories.flick(0, deviceCategories.maximumFlickVelocity)
+            deviceCategoriesList.flick(0, deviceCategoriesList.maximumFlickVelocity)
             pause(500).triggered.connect(function () {
-                deviceCategories.model = []
-                deviceCategories.model = widgetsEditorManager.categories
+                deviceCategoriesList.model = []
+                deviceCategoriesList.model = widgetsEditorManager.categories
             })
 
             /// костыль! должно обновиться автоматически
@@ -82,19 +79,19 @@ Item {
            id: deviceCategoriesScroll
            height: scrollArea.height;
            width: smallGap
-           scrollArea: deviceCategories;
+           scrollArea: deviceCategoriesList;
            anchors {
-               right: deviceCategories.right;
+               right: deviceCategoriesList.right;
                top: parent.top;
                bottom: parent.bottom
            }
        }
 
        ListView {
-           id: categoriesParameters
+           id: parametersList
 
            anchors {
-               left: deviceCategories.right; leftMargin: stringHeight
+               left: deviceCategoriesList.right; leftMargin: stringHeight
                right: fileEditContainer.left; rightMargin: stringHeight
                top: parent.top
                bottom: attributesContainer.isEnoughRoomToShow ? attributesContainer.top : parent.bottom
@@ -112,12 +109,12 @@ Item {
                    selectedParametersCount = 0
 
                    /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво, т.е. список успевал колыхнуться
-                   categoriesParameters.flick(0, categoriesParameters.maximumFlickVelocity)
+                   parametersList.flick(0, parametersList.maximumFlickVelocity)
                    pause(500).triggered.connect(function () {
 
                        /// костыль: обновление внешнего вида модели не происходит естественным путем почему-то
-                       categoriesParameters.model = [];
-                       categoriesParameters.model = curentParameters
+                       parametersList.model = [];
+                       parametersList.model = curentParameters
                    })
 
                    /// костыль!
@@ -129,11 +126,11 @@ Item {
 
        ScrollLine {
            id: parametersScroll
-           scrollArea: categoriesParameters
+           scrollArea: parametersList
            width: smallGap
            anchors {
-               right: categoriesParameters.right;
-               top: parent.top; bottom: categoriesParameters.bottom
+               right: parametersList.right;
+               top: parent.top; bottom: parametersList.bottom
            }
        }
 
@@ -141,12 +138,13 @@ Item {
            id: attributesContainer
 
            property bool isEnoughRoomToShow: attributesContainer.width - 150 > bar.height
+           property int mode: bar.currentIndex
 
            visible: selectedParametersCount > 0
            height: 200 // достаточно для расположения всевозможных атрибутов
            anchors{
-               right: categoriesParameters.right; left: categoriesParameters.left
-               bottom: deviceCategories.bottom
+               right: parametersList.right; left: parametersList.left
+               bottom: deviceCategoriesList.bottom
            }
 
            TabBar {
@@ -157,8 +155,8 @@ Item {
               x: (-width + height )/ 2
               y: - x
               height: profilesBtn.height
-               currentIndex: 0
-               font: appFont
+              currentIndex: 0
+              font: appFont
 
                TabButton {
                    id: profilesBtn
@@ -177,7 +175,7 @@ Item {
 
            }
            AttributesTab{
-               id: attributeTab
+               id: attributesTab
 
                anchors {
                    fill: parent
@@ -192,7 +190,7 @@ Item {
 
            anchors{
                 right: parent.right
-                top: deviceCategories.top
+                top: deviceCategoriesList.top
                 bottom: parent.bottom
            }
            width: window.width * 0.3
@@ -229,16 +227,17 @@ Item {
            }
        }
 
-   function onItemClicked(curentItem, selectedItems){
+   function addOrReplace(curItemNum, selectedItems){
 
        /// кликнули на пункт - он становится выделенным, если не был, и невыделенным, если был
        with(selectedItems){
-           var numberAmongSelected = indexOf(curentItem)
-           if(numberAmongSelected >= 0)
+           var numberAmongSelected = indexOf(curItemNum)
+           var isAdded = numberAmongSelected >= 0
+           if(isAdded)
                splice(numberAmongSelected, 1)
-           else push(curentItem)
-           numberAmongSelected = indexOf(curentItem)
-           return numberAmongSelected
+           else
+               push(curItemNum)
+           return indexOf(curItemNum) >= 0
        }
    }
 
@@ -246,47 +245,59 @@ Item {
 
        /// инициализация выходного объекта, делается один раз за одну выборку категорий
        with(JSON){
-           if(stringify(outFileContent) === '{}'){
                outFileContent["text_params"] = parse('{}')
                outFileContent["analog_params"] = parse('{}')
                outFileContent["param_icons"] = parse('{}')
-           }
        }
 
-       /// выяснение, в режиме редактирования каких параметров мы находимся - текстовых или аналоговых
-       var belongsTo = bar.currentIndex === Mode.AttributeRepresentation.TEXT ? outFileContent["text_params"] : outFileContent["analog_params"]
-       var notBelongsTo = bar.currentIndex === Mode.AttributeRepresentation.TEXT ? outFileContent["analog_params"] : outFileContent["text_params"]
-
+       /// мы запоминаем все индексы элементов, что добавлены для каждой секции во избежание добавления элементов с одинаковыми индексами
+       var indexesForTextAdded = []
+       var indexesForAnalogAdded = []
        for(var i = 0; i < selectedParameters.length; i++){
 
-           /// выяснение, встречается ли параметр в файле, нет - он должен быть дописан, нет - переписан
-           var selectedParamName = curentParameters[selectedParameters[i]].name // todo ask superviser wich one must be overriten if several are chosen
+           with(curentParameters[selectedParameters[i]]){
 
-           /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
-           belongsTo[attributeIndex + i] = []
-           belongsTo[attributeIndex + i][0] = selectedParamName
-           belongsTo[attributeIndex + i][1] = attributeSignature
+               /// выяснение, в режиме редактирования каких параметров мы находимся - текстовых или аналоговых
+               var belongsTo, notBelongsTo
+               belongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["text_params"] : outFileContent["analog_params"]
+               notBelongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["analog_params"] : outFileContent["text_params"]
 
-           /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
-           if(bar.currentIndex === Mode.AttributeRepresentation.ANALOG){
-               belongsTo[attributeIndex + i][2] = attributeUpperBondary
-               belongsTo[attributeIndex + i][3] = attributeLowerBondary
-               if(attributeIcon != "")
-               outFileContent["param_icons"][selectedParamName] = attributeIcon
+               /// если параметр с таким именем встречается в файле он будет переписан, нет - он будет дописан         //
+            if(representType === Mode.AttributeRepresentation.TEXT){
+                while(indexesForTextAdded.indexOf(indexCur) >= 0)
+                    indexCur++
+                indexesForTextAdded.push(indexCur)
+            }
+            else if(representType === Mode.AttributeRepresentation.ANALOG){
+                while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
+                    indexCur++
+            indexesForAnalogAdded.push(indexCur)
+            }
 
-           }
+               /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
+               belongsTo[indexCur] = []
+               belongsTo[indexCur][0] = name
+               belongsTo[indexCur][1] = signatureCur
 
-           ///если же текстовая, надо удалить картинки из секции картинок
-           else{
-               delete outFileContent["param_icons"][selectedParamName]
-           }
+               /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
+               if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
+                   belongsTo[indexCur][2] = upperBoundaryCur
+                   belongsTo[indexCur][3] = lowerBoundaryCur
+                   if(imageCur != "")
+                   outFileContent["param_icons"][name] = imageCur
+               }
+               ///если же текстовая, надо удалить картинки из секции картинок
+               else
+                   delete outFileContent["param_icons"][name]
+            }
 
            /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой)
            for (var keyNotBelong in notBelongsTo){
-               delete notBelongsTo[attributeIndex + i]
+               delete notBelongsTo[indexCur]
                console.debug("notBelongsTo Worked")
            }
        }
+
        fileEdit.text = "ComplexWidget" + JSON.stringify(outFileContent, [], ' ')
    }
 }

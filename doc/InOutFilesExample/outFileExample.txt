@@ -1,0 +1,46 @@
+{
+	"text_params": {
+		"3": [
+			"altitude",
+			"zxczc"
+		],
+		"4": [
+			"geo_height",
+			"zxczc"
+		],
+		"5": [
+			"login",
+			"zxczc"
+		],
+		"6": [
+			"stateargs",
+			"zxczc"
+		],
+		"7": [
+			"state",
+			"zxczc"
+		],
+		"8": [
+			"alarmDelayMs",
+			"zxczc"
+		],
+		"9": [
+			"additional_info",
+			"zxczc"
+		],
+		"10": [
+			"categoryName",
+			"zxczc"
+		],
+		"11": [
+			"ping_time",
+			"zxczc"
+		],
+		"12": [
+			"position",
+			"zxczc"
+		]
+	},
+	"analog_params": {},
+	"param_icons": {}
+}

@@ -4,7 +4,6 @@ import QtGraphicalEffects 1.0 // for ColorOverlay
 Rectangle {
     id: delegate
 
-    property int numberAmongSelected: -1 //ListView.isCurrentItem
     property color delegateColor: selectedCategories.indexOf(index) >= 0 ? "#000000" : "#303030"
 
     Behavior on scale { PropertyAnimation { duration: 300 } }
@@ -19,7 +18,7 @@ Rectangle {
     Image {
         id: categoryIcon
         anchors.fill: parent
-        source: "../rs/svg/settings_gears.svg"
+        source: "qrc:/../rs/svg/settings_gears.svg"
         ColorOverlay {
             anchors.fill: parent
             source: parent
@@ -53,11 +52,10 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            numberAmongSelected = onItemClicked(index, selectedCategories)
-
+            var isAdded = addOrReplace(index, selectedCategories)
             /// костыль: не обновляется автоматически
-            delegateColor = numberAmongSelected >=0 ? "#000000" : "#303030"
-            delegate.scale = numberAmongSelected >= 0 ? 1.0 : 0.75
+            delegateColor = isAdded ? "#000000" : "#303030"
+            delegate.scale = isAdded ? 1.0 : 0.75
             selectedCategoriesCount = selectedCategories.length
 
             curentParameters = findAvailableParamsIntersection()
@@ -65,7 +63,7 @@ Rectangle {
             selectedParametersCount = 0
 
             // костыль
-            categoriesParameters.model = curentParameters
+            parametersList.model = curentParameters
             attributesContainer.visible = curentParameters.length > 0
         }
     }

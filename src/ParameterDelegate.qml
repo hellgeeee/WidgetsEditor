@@ -49,16 +49,23 @@
 ****************************************************************************/
 
 import QtQuick 2.2
+import QtQuick.Controls 2.10
 
 Item {
     id: delegate
 
-    property int numberAmongSelected: -1//ListView.isCurrentItem
-
     property int parameterIndex: 0
-    property string parameterSignature: ""
-
-    width: 100;
+    property string description:
+        curentParameters[index].indexCur !== -1 ?
+            qsTr("Параметр" + (curentParameters[index].representType === 0 ? " текстовый" : " аналоговый") +
+            " с индексом " + curentParameters[index].indexCur +
+            " и подписью \"" + curentParameters[index].signatureCur + "\" ") :
+            ""
+    property url image:
+        curentParameters[index].imageCur !== "" ?
+            Qt.resolvedUrl("../rs/svg/" + curentParameters[index].imageCur + ".svg") :
+            ""
+    width: 100
     height: 50 // todo make width dependent on content
 
     scale: selectedParameters.indexOf(index) >= 0 ? 1 : 0.75
@@ -66,28 +73,23 @@ Item {
 
     Column {
         anchors.fill: parent
-        spacing: smallGap
 
         Row {
             width: parent.width
-            spacing: 8
-// то, что здесь закомменчено - раскомментить, если помимо атрибута выводить еще картинку и доп. инфо
-//            Column {
-//                visible: false
-//                Item {
-//                    width: smallGap * 0.5
-//                    height: titleText.font.pixelSize * 0.25
-//                }
+            spacing: smallGap
 
-//                Image {
-//                    id: titleImage
-//                    visible: false//source !== ""
-//                    source: parameter.image !== "" ? parameter.image : ""
-//                }
-//            }
+            Image {
+                id: descriptionImage
+
+                visible: source !== ""
+                height: parent.height
+                width: height
+                source: image
+            }
 
             Text {
                 id: titleText
+
                 anchors.leftMargin: stringHeight
                 color: selectedParameters.indexOf(index) >= 0 ? "#000000" : "#303030"
                 text: typeof(curentParameters[index]) !== "undefined" ? curentParameters[index].name : ""
@@ -97,43 +99,42 @@ Item {
             }
         }
 
-/*        Text {
+       Text {
+            id: descriptionText
+
             width: parent.width
             font.pixelSize: appFont.pixelSize * 0.8
             textFormat: Text.RichText
             font.italic: true
-            text: qsTr("Поле" + " с индексом " + parameterIndex + " и подписью \"" + parameterSignature + "\" ")
+            text: description
         }
-
-        Text {
-            text: "Текстовое"
-            width: parent.width
-            wrapMode: Text.WordWrap
-            font.pixelSize: 14
-            textFormat: Text.StyledText
-            horizontalAlignment: Qt.AlignLeft
-        }*/
     }
 
     MouseArea {
         anchors.fill: parent
         scale: 1.5
         onClicked: {
-            numberAmongSelected = onItemClicked(index, selectedParameters)
+            /// параметр не был выделен - стал, был - выделение сбросилось
+            var isAdded = addOrReplace(index, selectedParameters)
+
+            /// панель атрибутов показываем лишь тогда, когда есть выбранные параметры
             attributesContainer.visible = (selectedParameters.length > 0)
 
+            /// если параметр выделен, яркий цвет и размер, сброшен - размер уменьшается и цвет блеклый
+            titleText.color = isAdded >= 0 ? "#000000" : "#303030"
+            delegate.scale = isAdded ? 1.0 : 0.75
+            description = qsTr(isAdded ? "<b>Редактируется в данный момент</b>" : "Выделение сброшено")
 
-            /// костыль
-            titleText.color = numberAmongSelected >= 0 ? "#000000" : "#303030"
-            delegate.scale = numberAmongSelected >= 0 ? 1.0 : 0.75
             selectedParametersCount = selectedParameters.length
+
+            /// если произошел выбор параметра кликом (а не сброс), то тому, который был выбран до него (предпоследнему выбранному, получается),
+            /// присваиваются значения атрибутов из табы атрибутов
+            if(isAdded && selectedParametersCount > 1)
+                writeParamFromGui(selectedParameters[selectedParametersCount - 2])
+
+            /// если произошел сброс параметра
+            else
+                resetParam(index)
         }
     }
-
- //   function getNameAndSignature(){
- //       for(var param in outputFileContent["analog_params"]){
- //           if(param.val)
- //           outputFileContent["analog_params"][attrNumberInFile] = [selectedParam, barContainer.attributeIndex, barContainer.attributeSignature]
- //       }
- //   }
 }

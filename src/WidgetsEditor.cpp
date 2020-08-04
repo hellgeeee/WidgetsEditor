@@ -95,17 +95,9 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     WidgetsEditorManager* widgetsEditorManager = new WidgetsEditorManager(&app);
-
-    // please use this for debug when you have no file to read
-    //    QList<QObject*> facilityCategories0;
-    //    facilityCategories0.append(new FacilityCategory("red"));
-    //    facilityCategories0.append(new FacilityCategory("green"));
-    //    facilityCategories0.append(new FacilityCategory("blue"));
-    //    facilityCategories0.append(new FacilityCategory("yellow"));
-
     QQuickView view;
     view.connect(view.engine(), &QQmlEngine::quit, &app, &QCoreApplication::quit);
-    view.setSource(QUrl("../src/WidgetsEditor.qml"));
+    view.setSource(QUrl("qrc:/WidgetsEditor.qml"));
     if (view.status() == QQuickView::Error)
         return -1;
     view.setResizeMode(QQuickView::SizeRootObjectToView);

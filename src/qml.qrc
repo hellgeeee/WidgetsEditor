@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/">
+        <file>WidgetsEditor.qml</file>
+        <file>About.qml</file>
+        <file>AttributeFieldPre.qml</file>
+        <file>AttributeFieldText.qml</file>
+        <file>AttributesTab.qml</file>
+        <file>BusyIndicator.qml</file>
+        <file>CategoryDelegate.qml</file>
+        <file>EditingArea.qml</file>
+        <file>ErrorWnd.qml</file>
+        <file>Footer.qml</file>
+        <file>InOutSettings.qml</file>
+        <file>MenuDelegate.qml</file>
+        <file>Mode.qml</file>
+        <file>ParameterDelegate.qml</file>
+        <file>ScrollLine.qml</file>
+        <file>Tutorial.qml</file>
+        <file>WidgetsEditorMenu.qml</file>
+        <file>../rs/mp3/attention.mp3</file>
+        <file>../rs/mp3/done.mp3</file>
+        <file>../rs/mp3/done_very_much.mp3</file>
+        <file>../rs/mp3/error.mp3</file>
+        <file>../rs/mp3/error_but_funny.mp3</file>
+        <file>../rs/mp3/error_but_funny2.mp3</file>
+        <file>../rs/mp3/success.mp3</file>
+        <file>../rs/mp3/widget_closed.mp3</file>
+        <file>../rs/svg/close-button.svg</file>
+        <file>../rs/svg/download-symbol.svg</file>
+        <file>../rs/svg/file.svg</file>
+        <file>../rs/svg/settings_gears.svg</file>
+    </qresource>
+</RCC>
