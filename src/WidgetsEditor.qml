@@ -11,8 +11,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Extras 1.4
 import QtMultimedia 5.12
-
-
+import Qt.labs.settings 1.0
 
 Item {
     id: window
@@ -20,8 +19,8 @@ Item {
     property int curentMode: Mode.EditingMode.IN_OUT_SETTINGS
 
     property bool loading: false
-    property int stringHeight : 30
-    property int smallGap : 8
+    property int stringHeight : window.width * 0.04
+    property int smallGap : window.width * 0.01
     property font appFont: editingArea.appFont
 
     property var outFileContent: JSON.parse('{}')
@@ -48,6 +47,10 @@ Item {
         source: "qrc:/../rs/mp3/error_but_funny2.mp3"
     }
     MediaPlayer{
+        id: warnSound
+        source: "qrc:/../rs/mp3/attention.mp3"
+    }
+    MediaPlayer{
         id: successSound
         source: "qrc:/../rs/mp3/success.mp3"
     }
@@ -71,11 +74,10 @@ Item {
         width: height
         anchors {
             top: closeButton.top
-            right: saveButton.left
-            rightMargin: smallGap * 0.5
+            right: closeButton.left
+            rightMargin: width
         }
         MouseArea {
-            id: ma
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
@@ -84,78 +86,9 @@ Item {
                 /// костыль, почему-то не обновляется само собой
                 menu.visible = curentMode === Mode.EditingMode.SETTINGS
             }
+            ToolTip.visible: containsMouse
+            ToolTip.text: "Настройки"
         }
-
-        ToolTip{
-            visible: ma.containsMouse
-            text: "Настройки";
-            y: stringHeight
-        }
-    }
-
-    DelayButton{
-        id: saveButton
-
-        visible: curentMode === Mode.EditingMode.GRAPHIC_EDITING ||
-                 curentMode === Mode.EditingMode.TEXT_EDITING
-        enabled: checked === false
-
-        height: stringHeight
-        width: height
-        anchors {
-            top: closeButton.top
-            right: closeButton.left
-            rightMargin: width
-        }
-        delay: 1000
-
-        onHoveredChanged: infoTooltip.visible = !infoTooltip.visible
-        onActivated: {
-
-            /// хотим, чтобы после клика кнопка немного помигала. Показывая, что в файл идет запись
-            pause(3000).triggered.connect(function () {checked = false})
-
-            switch(curentMode) {
-                case Mode.EditingMode.GRAPHIC_EDITING:
-                    ///editingArea.paramsToJson()
-                    if(editingArea.outputFileText === '' ||
-                        editingArea.outputFileText ===
-                        '"text_params": {},
-                        "analog_params": {},
-                        "param_icons": {}'){
-                        errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла"))
-                        return
-                    }
-                    console.time("1")
-                    widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
-                break
-
-                case Mode.EditingMode.TEXT_EDITING:
-                    try {
-                        outFileContent = JSON.parse(editingArea.outputFileText)
-                        widgetsEditorManager.outFileContent = outFileContent
-                    } catch(e) {
-                        errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
-                    }
-                break
-
-              default:
-                break
-            }
-            successSound.play()
-
-        }
-
-        Rectangle{anchors.fill: parent; anchors.margins: 1; radius: width * 0.5;
-            Image {source: "qrc:/../rs/svg/download-symbol.svg"; anchors.fill: parent}
-        }
-
-        ToolTip{
-            id: infoTooltip
-            text: "Удерживайте, чтобы сорханить изменения во внешнюю память";
-            y: stringHeight
-        }
-        //
     }
 
     Image {
@@ -170,7 +103,6 @@ Item {
         }
 
         MouseArea {
-            id: maClose
             anchors.fill: parent
             hoverEnabled: true
             onClicked:
@@ -184,16 +116,16 @@ Item {
                        pause(1200).triggered.connect(function () {Qt.quit()})
                        closeSound.play();
                     }
-        }
 
-        ToolTip{
-            visible: maClose.containsMouse
-            text: "Закрыть";
-            y: stringHeight
+            ToolTip.visible: containsMouse
+            ToolTip.text: "Закрыть"
         }
     }
 
-
+    Settings {
+        property alias width: window.width
+        property alias height: window.height
+    }
 
     function findAvailableParamsIntersection (){
         if(selectedCategories.length === 0 ){
@@ -210,7 +142,7 @@ Item {
         var intersection = widgetsEditorManager.categories[selectedCategories[0]].parameters
         for(var catCompNum = 1; catCompNum < selectedCategories.length; catCompNum++){
             var intersectionCur = []
-            var attributesComp = widgetsEditorManager.categories[selectedCategories[catCompNum]].attributes//deviceCategoriesModel[selectedCategories[catCompNum]].attributes
+            var attributesComp = widgetsEditorManager.categories[selectedCategories[catCompNum]].parameters//deviceCategoriesModel[selectedCategories[catCompNum]].attributes
 
             /// ищем общие параметры из двух категорий
             for(var i = 0; i < intersection.length; i++){
@@ -256,6 +188,11 @@ Item {
         }
     }
 
+    function trimUrl(str){
+        if(str === "")
+            return ""
+        return str.toString().substring(8, str.length)
+    }
 
     /// отсрочка для выполнения определенных действий (остальные действия она не тормозит)
     function pause(duration){

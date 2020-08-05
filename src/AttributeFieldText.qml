@@ -12,15 +12,14 @@ TextArea{
         right: parent.right
         margins: smallGap
     }
-    height: font.pixelSize * 2 +1
+    height: font.pixelSize * 2.5
+    width: parent.width
     font: appFont
-    width: 100
     leftPadding: shift < 0 ? shift : smallGap
-    ToolTip{
-        visible: attributeField.hovered && shift < 0
-        text: attributeField.text;
-        y: stringHeight
-    }
+ verticalAlignment: "AlignVCenter"
+
+    ToolTip.visible: hovered && shift < 0
+    ToolTip.text: attributeField.text;
 
     /// рамка
     Rectangle{color: "transparent"; anchors.fill: parent; border.color: "grey"}

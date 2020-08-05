@@ -56,17 +56,17 @@ Item {
 
     property int parameterIndex: 0
     property string description:
-        curentParameters[index].indexCur !== -1 ?
+        curentParameters.length > 0 && curentParameters[index].indexCur !== -1 ?
             qsTr("Параметр" + (curentParameters[index].representType === 0 ? " текстовый" : " аналоговый") +
             " с индексом " + curentParameters[index].indexCur +
             " и подписью \"" + curentParameters[index].signatureCur + "\" ") :
             ""
-    property url image:
-        curentParameters[index].imageCur !== "" ?
+    property url image:{
+        return curentParameters[index].imageCur !== "" ?
             Qt.resolvedUrl("../rs/svg/" + curentParameters[index].imageCur + ".svg") :
-            ""
-    width: 100
-    height: 50 // todo make width dependent on content
+            ""}
+    width: parent.width
+    height: stringHeight * 2 // todo make width dependent on content
 
     scale: selectedParameters.indexOf(index) >= 0 ? 1 : 0.75
     Behavior on scale { PropertyAnimation { duration: 300 } }
@@ -81,20 +81,21 @@ Item {
             Image {
                 id: descriptionImage
 
-                visible: source !== ""
-                height: parent.height
+                visible: source.toString() !== ""
+                height: visible ? parent.height : 0
                 width: height
                 source: image
+                //todo onVisibleChanged: {print("source:" + source.toString())}
             }
 
             Text {
                 id: titleText
 
-                anchors.leftMargin: stringHeight
+                y: stringHeight * 0.7 // ликвидация пробела, вызванногоо h2
                 color: selectedParameters.indexOf(index) >= 0 ? "#000000" : "#303030"
-                text: typeof(curentParameters[index]) !== "undefined" ? curentParameters[index].name : ""
+                text: typeof(curentParameters[index]) !== "undefined" ? "<h2>" + curentParameters[index].name + "</h2>" : ""
                 wrapMode: Text.WordWrap
-                font {pixelSize: appFont.pixelSize * 1.5; bold: true}
+                font: appFont
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
         }
@@ -103,10 +104,9 @@ Item {
             id: descriptionText
 
             width: parent.width
-            font.pixelSize: appFont.pixelSize * 0.8
+            font: appFont
             textFormat: Text.RichText
-            font.italic: true
-            text: description
+            text: "<i><small>" + description + "</small></i>"
         }
     }
 

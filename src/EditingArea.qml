@@ -1,7 +1,11 @@
 import QtQuick 2.14
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
+import Qt.labs.platform 1.1
+import Qt.labs.settings 1.0
+
+import QtQuick.Extras 1.4
 
 //todo разбить
 Item {
@@ -15,6 +19,7 @@ Item {
     property alias deviceCategoriesList: deviceCategoriesList
     property alias parametersList: parametersList
     property alias outputFileText: fileEdit.text
+    property alias outputFileName: outFileNameInput.text
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
     anchors.fill: parent
@@ -29,7 +34,7 @@ Item {
         }
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
-        font.pixelSize: 14
+        font.pixelSize: window.width * 0.02
         z: 1
     }
 
@@ -137,11 +142,12 @@ Item {
        Item{
            id: attributesContainer
 
-           property bool isEnoughRoomToShow: attributesContainer.width - 150 > bar.height
+           property bool isEnoughRoomToShow: width - 70 > bar.height
            property int mode: bar.currentIndex
 
            visible: selectedParametersCount > 0
-           height: 200 // достаточно для расположения всевозможных атрибутов
+           onVisibleChanged: print("visible: " + visible + " selectedParametersCount: " + selectedParametersCount)
+           height: window.width * 0.3 // достаточно для расположения всевозможных атрибутов
            anchors{
                right: parametersList.right; left: parametersList.left
                bottom: deviceCategoriesList.bottom
@@ -191,7 +197,7 @@ Item {
            anchors{
                 right: parent.right
                 top: deviceCategoriesList.top
-                bottom: parent.bottom
+                bottom: parent.bottom; bottomMargin: stringHeight
            }
            width: window.width * 0.3
            contentWidth: width;
@@ -225,6 +231,167 @@ Item {
                right: fileEditContainer.right;
                top: fileEditContainer.top; bottom: fileEditContainer.bottom
            }
+       }
+
+
+       AttributeFieldText{
+           id: outFileNameInput
+
+           anchors{
+               top: fileEditContainer.bottom
+               margins: 0
+           }
+
+           height: stringHeight
+           width: fileEditContainer.width
+           placeholderText: qsTr("Имя выходного файла ")
+
+           Image {
+               id: outFileCoiceBtn
+
+               anchors{
+                   top: parent.top; bottom: parent.bottom
+                   right: outFileAcceptBtn.left
+                   margins: smallGap * 0.5
+               }
+               width: height
+               source: "qrc:/../rs/svg/file.svg"
+
+               MouseArea {
+                   id: outFileButton
+
+                   anchors.fill: parent
+                   hoverEnabled: true
+                   onClicked: fileDialog.open()
+                   ToolTip.visible: containsMouse
+                   ToolTip.text: outFileNameInput.text === "" ? qsTr("Выбрать выходной файл") : outFileNameInput.placeholderText + outFileNameInput.text;
+               }
+           }
+
+           /// кнопка принятия файла вывода
+           Image {
+               id: outFileAcceptBtn
+               anchors{
+                   top: parent.top; bottom: parent.bottom
+                   right: outFileRecordBtn.left
+                   margins: smallGap * 0.5
+               }
+               width: height
+               source: "qrc:/../rs/svg/download-symbol.svg"
+
+               MouseArea {
+                   id: outFileAcceptMa
+                   anchors.fill: parent
+                   hoverEnabled: true
+                   onClicked: {
+                       /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
+                       widgetsEditorManager.outFileName = outFileNameInput.text
+                       outputFileText = widgetsEditorManager.outFileContent
+                   }
+                   ToolTip.visible: containsMouse
+                   ToolTip.text: qsTr("Прочитать выходной файл")
+               }
+           }
+
+           /// кнопка записи файла вывода
+           DelayButton{
+               id: outFileRecordBtn
+               enabled: checked === false
+               height: stringHeight
+               width: height
+               anchors{
+                   top: parent.top; bottom: parent.bottom
+                   right: parent.right
+                   margins: smallGap * 0.25
+               }
+               delay: 1000
+
+               ToolTip.visible: hovered
+               ToolTip.text: "Удерживайте, чтобы записать выходной файл";
+
+               onActivated: {
+
+                   /// хотим, чтобы после клика кнопка немного помигала. Показывая, что в файл произошла запись
+                   pause(5000).triggered.connect(function () {checked = false})
+
+                   /// если файл уже есть, выдаем сообщение о его перезаписи
+                   widgetsEditorManager.outFileName = editingArea.outputFileName
+
+
+                   /// пустое текстовое поле используем как показатель того, что пользователь ничего не редактировал
+                   if(editingArea.outputFileText === '' ||
+                       editingArea.outputFileText ===
+                       '"text_params": {},
+                       "analog_params": {},
+                       "param_icons": {}'){
+                       errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла"))
+                       return
+                   }
+
+                   if(curentMode === Mode.EditingMode.GRAPHIC_EDITING) {
+
+                           widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
+
+                           /// создание строчки для записи в файл виджетов
+                           var selectedCategoriesJsn = JSON.parse('{}')
+                           selectedCategoriesJsn[outFileNameInput.text] = [];
+                           for (var i = 0; i < selectedCategoriesCount; i++)
+                               selectedCategoriesJsn[outFileNameInput.text].push(widgetsEditorManager.categories[selectedCategories[i]].name)
+                           var selectedCategoriesStr = JSON.stringify(selectedCategoriesJsn)
+                           //selectedCategoriesStr = selectedCategoriesStr.substring(1, selectedCategoriesStr.length-1)
+                           widgetsEditorManager.selectedCategories = selectedCategoriesStr
+                   }
+                   else{
+                       try {
+                           outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", editingArea.outputFileText))
+                           widgetsEditorManager.outFileContent = editingArea.outputFileText
+                       } catch(e) {
+                           errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
+                           return
+                       }
+                   }
+
+                   errorWnd.isQuestion = true
+                   if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName)){
+                       // todo не знаю, как остановить работу программы до момента ответа пользователя
+                       errorWnd.show("Файл вывода уже существует и будет перезаписан")//. Продолжить?")
+                   }
+                   else
+                       errorWnd.show("Файл вывода не существует и перед записью будет создан")//. Продолжить?")
+
+                   pause(5000).triggered.connect(function () {successSound.play(); errorWnd.text = "Готово"});
+
+               }
+
+               Rectangle{
+                   anchors.fill: parent;
+                   radius: width * 0.5;
+                   anchors.margins: smallGap > 7 ? smallGap * 0.25 : 2;
+                   Image {
+                       source: "qrc:/../rs/svg/download-symbol.svg";
+                       rotation: -90
+                       anchors.fill: parent
+                   }
+               }
+           }
+
+
+           FileDialog {
+               id: fileDialog
+
+               title: qsTr("Выбор текстового файла вывода")
+               folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
+               nameFilters: [ "Text files (*.txt *.js *json)", "All files (*)" ]
+               onAccepted: {
+
+                   /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
+                   widgetsEditorManager.outFileName = outFileNameInput.text
+                   outputFileText = widgetsEditorManager.outFileContent
+               }
+           }
+
+           Settings { property alias outputFileName: outFileNameInput.text }
+
        }
 
    function addOrReplace(curItemNum, selectedItems){
@@ -263,42 +430,43 @@ Item {
                notBelongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["analog_params"] : outFileContent["text_params"]
 
                /// если параметр с таким именем встречается в файле он будет переписан, нет - он будет дописан         //
-            if(representType === Mode.AttributeRepresentation.TEXT){
-                while(indexesForTextAdded.indexOf(indexCur) >= 0)
-                    indexCur++
-                indexesForTextAdded.push(indexCur)
-            }
-            else if(representType === Mode.AttributeRepresentation.ANALOG){
-                while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
-                    indexCur++
-            indexesForAnalogAdded.push(indexCur)
-            }
+                if(representType === Mode.AttributeRepresentation.TEXT){
+                    while(indexesForTextAdded.indexOf(indexCur) >= 0)
+                        indexCur++
+                    indexesForTextAdded.push(indexCur)
+                }
+                else if(representType === Mode.AttributeRepresentation.ANALOG){
+                    while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
+                        indexCur++
+                indexesForAnalogAdded.push(indexCur)
+                }
 
-               /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
-               belongsTo[indexCur] = []
-               belongsTo[indexCur][0] = name
-               belongsTo[indexCur][1] = signatureCur
+                   /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
+                   belongsTo[indexCur] = []
+                   belongsTo[indexCur][0] = name
+                   belongsTo[indexCur][1] = signatureCur
 
-               /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
-               if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
-                   belongsTo[indexCur][2] = upperBoundaryCur
-                   belongsTo[indexCur][3] = lowerBoundaryCur
-                   if(imageCur != "")
-                   outFileContent["param_icons"][name] = imageCur
+                   /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
+                   if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
+                       belongsTo[indexCur][2] = upperBoundaryCur
+                       belongsTo[indexCur][3] = lowerBoundaryCur
+                       if(imageCur != "")
+                       outFileContent["param_icons"][name] = imageCur
+                   }
+                   ///если же текстовая, надо удалить картинки из секции картинок
+                   else
+                       delete outFileContent["param_icons"][name]
+
+               /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой)
+               var keyNotBelong
+               for (keyNotBelong in notBelongsTo){
+                   delete notBelongsTo[indexCur]
+                   console.debug("notBelongsTo Worked")
                }
-               ///если же текстовая, надо удалить картинки из секции картинок
-               else
-                   delete outFileContent["param_icons"][name]
-            }
-
-           /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой)
-           for (var keyNotBelong in notBelongsTo){
-               delete notBelongsTo[indexCur]
-               console.debug("notBelongsTo Worked")
            }
        }
 
-       fileEdit.text = "ComplexWidget" + JSON.stringify(outFileContent, [], ' ')
+       fileEdit.text = /*"ComplexWidget" +*/ JSON.stringify(outFileContent, [], ' ')
    }
 }
 

@@ -35,12 +35,8 @@ Rectangle {
             top: parent.top; topMargin: stringHeight
         }
         wrapMode: Text.WrapAnywhere
-        font {
-            pixelSize: appFont.pixelSize * 1.5;
-            family: appFont.family;
-            bold: true;
-        }
-        text: widgetsEditorManager.categories[index].name
+        font: appFont
+        text: "<h1>" + widgetsEditorManager.categories[index].name + "</h1>"
         color: delegateColor
     }
 
@@ -64,7 +60,6 @@ Rectangle {
 
             // костыль
             parametersList.model = curentParameters
-            attributesContainer.visible = curentParameters.length > 0
         }
     }
 

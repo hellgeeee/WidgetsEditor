@@ -2,59 +2,31 @@ import QtQuick 2.10
 import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
 import QtMultimedia 5.12
+import Qt.labs.settings 1.0
 
 Item {
     id: inOutSettings
 
-    property alias inFileName: inFileNameInput.text
-    property alias outFileName: outFileNameInput.text
-    property alias widgetsExistFileName: widgetsExistFileNameInput.text
-    property int fileChoosingMode
-
     visible: curentMode === Mode.EditingMode.IN_OUT_SETTINGS
     anchors.fill: parent
 
-    AttributeFieldText{
-        id: inFileNameInput
-
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: - stringHeight * 2
-        width: window.width * 0.7
-        placeholderText: qsTr("Имя входного файла ")
-
-        Image {
-            anchors{
-                top: parent.top; bottom: parent.bottom
-                right: parent.right
-                margins: smallGap * 0.5
-            }
-            width: height
-            source: "qrc:/../rs/svg/file.svg"
-
-            MouseArea {
-                id: selectFileButton
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    fileChoosingMode = Mode.FileChoosing.IN_FILE
-                    fileDialog.open()
-                }
-            }
-
-            ToolTip{
-                visible: selectFileButton.containsMouse
-                text: inFileNameInput.text === "" ? qsTr("Выбрать входной файл") : inFileNameInput.placeholderText + inFileNameInput.text;
-                y: stringHeight
-            }
-        }
+    Text{
+       anchors{
+           bottom: ipeFolderInput.top;
+           left: ipeFolderInput.left
+       }
+       font: appFont
+       text: "<small><b>Папка, содержащая файл IntegraPlanetEarth.exe</b></small>"
     }
 
     AttributeFieldText{
-        id: outFileNameInput
+        id: ipeFolderInput
 
         anchors.centerIn: parent
-        width: inFileNameInput.width
-        placeholderText: qsTr("Имя выходного файла ")
+        anchors.verticalCenterOffset: -height
+        width: window.width * 0.8
+        placeholderText: qsTr("Введите путь и название либо выбирете из файловой системы")
+
 
         Image {
             anchors{
@@ -66,58 +38,64 @@ Item {
             source: "qrc:/../rs/svg/file.svg"
 
             MouseArea {
-                id: outFileButton
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked:
+                    folderDialog.open()
+                ToolTip.visible: containsMouse
+                ToolTip.text: ipeFolderInput.text === "" ? qsTr("Выбрать входной файл") : ipeFolderInput.text
+            }
+
+        }
+    }
+
+    Text{
+       anchors{
+           bottom: inFileInput.top;
+           left: inFileInput.left
+       }
+       font: appFont
+       text: "<small><b>Файл данных о категориях и их атрибутах</b></small>"
+    }
+
+    AttributeFieldText{
+        id: inFileInput
+
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: height
+        width: ipeFolderInput.width
+        placeholderText: qsTr("Введите путь и название либо выбирете из файловой системы")
+
+        Image {
+            anchors{
+                top: parent.top; bottom: parent.bottom
+                right: parent.right
+                margins: smallGap * 0.5
+            }
+            width: height
+            source: "qrc:/../rs/svg/file.svg"
+
+            MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    fileChoosingMode = Mode.FileChoosing.OUT_FILE
                     fileDialog.open()
                 }
+                ToolTip.visible: containsMouse
+                ToolTip.text: inFileInput.text === "" ? qsTr("Выбрать файл существующих виджетов ") : inFileInput.text
             }
 
-            ToolTip{
-                visible: outFileButton.containsMouse
-                text: outFileNameInput.text === "" ? qsTr("Выбрать выходной файл") : outFileNameInput.placeholderText + outFileNameInput.text;
-                y: stringHeight
-            }
         }
 
     }
 
-    AttributeFieldText{
-        id: widgetsExistFileNameInput
-
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: stringHeight * 2
-        width: inFileNameInput.width
-        placeholderText: qsTr("Имя файла уже существующих виджетов ")
-
-        Image {
-            anchors{
-                top: parent.top; bottom: parent.bottom
-                right: parent.right
-                margins: smallGap * 0.5
-            }
-            width: height
-            source: "qrc:/../rs/svg/file.svg"
-
-            MouseArea {
-                id: widgetsExistFileButton
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    fileChoosingMode = Mode.FileChoosing.EXISTING_WIDGETS_FILE
-                    fileDialog.open()
-                }
-            }
-
-            ToolTip{
-                visible: widgetsExistFileButton.containsMouse
-                text: outFileNameInput.text === "" ? qsTr("Выбрать файл существующих виджетов ") : outFileNameInput.placeholderText + outFileNameInput.text;
-                y: stringHeight
-            }
+    FolderDialog {
+        id: folderDialog
+        title: qsTr("Выбор папки приложения Integra Planet Earth")
+        folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
+        onAccepted:{
+            ipeFolderInput.text = trimUrl(folder)
         }
-
     }
 
     FileDialog {
@@ -126,23 +104,7 @@ Item {
         folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
         nameFilters: [ "Text files (*.txt *.js *json)", "All files (*)" ]
         onAccepted:
-            switch(fileChoosingMode){
-            case Mode.FileChoosing.IN_FILE:
-                inFileNameInput.text = trimUrl(file)
-                break
-            case Mode.FileChoosing.OUT_FILE:
-                outFileNameInput.text = trimUrl(file)
-                break
-            case Mode.FileChoosing.EXISTING_WIDGETS_FILE:
-                widgetsExistFileNameInput.text = trimUrl(file)
-                break
-            }
-
-        function trimUrl(str){
-            if(str === "")
-                return ""
-            return str.toString().substring(8, file.length)
-        }
+            inFileInput.text = trimUrl(file)
     }
 
     Image {
@@ -153,43 +115,39 @@ Item {
         width: height
         rotation: -90
         anchors {
-            left: widgetsExistFileNameInput.right
-            top:  widgetsExistFileNameInput.bottom
+            left: inFileInput.right
+            top:  inFileInput.bottom
             margins: stringHeight
         }
 
         MouseArea {
-            id: ma
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: save()
+            onClicked: save()            
+            ToolTip.visible: containsMouse
+            ToolTip.text: "Перейти к редактированию"
         }
+    }
 
-        ToolTip{
-            visible: ma.containsMouse
-            text: "Перейти к редактированию";
-            y: stringHeight
-        }
+    Settings {
+        property alias inFileName: ipeFolderInput.text
+        property alias widgetsExistFileName: inFileInput.text
     }
 
     function save(){
         /// проверка существования всех файлов ввода-вывода
-        if(!doesFileExist(inFileName) || !doesFileExist(outFileName) || (widgetsExistFileName !== "" && !doesFileExist(widgetsExistFileName)) ){
+        if(!doesFileExist(ipeFolderInput.text + "/IntegraPlanetEarth.exe") || !doesFileExist(inFileInput.text) ){
             errorWnd.show(qsTr("Ошибка, один из файлов не был найден. Пожалуйста проверьте правильность ввода пути и имени файла или создайте такой файл"))
             return
         }
 
-        /// передача имен файлов в c++
-        /// внимание, необязательный файл widgetsExistFileName надо считывать первым. Иначе парс из сеттеров обязательных файлов произойдет без него
-        widgetsEditorManager.widgetsExistFileName = widgetsExistFileName
-        widgetsEditorManager.inFileName = inFileName /// чтение входного файла мы производим на стороне с++, т.к. скорость важна
-        widgetsEditorManager.outFileName = outFileName
+        /// передача имен файлов в c++, важно: сначала передаем директорию
+        widgetsEditorManager.IPEFolder = ipeFolderInput.text
+        widgetsEditorManager.inFileName = inFileInput.text /// чтение входного файла мы производим на стороне с++, т.к. скорость важна
 
         /// установка режима редактирования
         curentMode = Mode.EditingMode.GRAPHIC_EDITING
         editingArea.deviceCategoriesList.model = widgetsEditorManager.categories
-
-        readOutputFile() /// чтение выходного файла мы производим на стороне qml, т.к. скорость не важна
 
         doneSound.play()
     }
@@ -201,9 +159,10 @@ Item {
         return req.status === 200
     }
 
-    function readOutputFile(){
+    // раскомментить в случае, если будете считывать файл из qml,  а не из с++
+    /*function readOutputFile(){
        var xhr = new XMLHttpRequest
-       xhr.open("GET", "file:///" + inOutSettings.outFileName); // set Method and File
+       xhr.open("GET", "file:///" + widgetsEditorManager.IPEFolder + "../../" +  fileName); // set Method and File
        var response
        xhr.onreadystatechange = function () {
            if(xhr.readyState === XMLHttpRequest.DONE){ // if request_status == DONE
@@ -211,5 +170,5 @@ Item {
            }
        }
        xhr.send(); // begin the request
-   }
+   }*/
 }

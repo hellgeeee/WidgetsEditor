@@ -6,7 +6,7 @@
 #include <QObject>
 #include "WidgetsEditor.h"
 #include <QJsonDocument>
-#include <QJsonObject>
+#include <QMessageBox>
 
 #include <QJsonArray>
 
@@ -15,15 +15,17 @@
 QList<QObject*> WidgetsEditorManager::parse()
 {
     /// 1. Считать те категории устройств, для которых виджеты уже существуют
-    QFile file(_widgetsExistFileName);
+    QDir IPEFolder = QDir(_IPEFolder);
+    IPEFolder.cd("../../qml/SensorView/scripts");
+
+    QFile file(IPEFolder.path() + "/views.js");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QList<QObject*>();
+    QString str = QString(file.readAll());
+    file.close();
+
     QSet<QString> existingWidgetsCategories;
-
-    if(_widgetsExistFileName != ""){
-        if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            return QList<QObject*>();
-        QString str = QString(file.readAll());
-        file.close();
-
+    if(str != ""){
         /// избавляемся от "var personal = "
         str = str.replace(0, str.indexOf("{"), "");
 
@@ -39,12 +41,11 @@ QList<QObject*> WidgetsEditorManager::parse()
             str = str.replace(wrongBraceInd, 1, "\"");
         }
 
-        QJsonObject jsn = QJsonDocument::fromJson(str.toUtf8()).object();
+        _existingWidgetsJsn = QJsonDocument::fromJson(str.toUtf8()).object();
 
-        for(auto widgetName : jsn.keys())
-        for(auto category : jsn[widgetName].toArray() ){
-            existingWidgetsCategories.insert(category.toString());
-        }
+        for(auto widgetName : _existingWidgetsJsn.keys())
+            for(auto category : _existingWidgetsJsn[widgetName].toArray() )
+                existingWidgetsCategories.insert(category.toString());
     }
 
     /// 2. Считать категории устройств, доступных для участия в создании виджетов
@@ -72,19 +73,70 @@ DeviceCategory::DeviceCategory(const QString& name, QObject* parent) : QObject(p
     _name = name;
 }
 
-void WidgetsEditorManager::setCategories(QList<QObject*> val){
-    _categories = val;
+void WidgetsEditorManager::setInFileName(const QString& val){
+    _inFileName = val;
+    _categories = parse();
+}
+
+void WidgetsEditorManager::setOutFileName(const QString& val){
+
+    QDir IPEFolder = QDir(_IPEFolder);
+    IPEFolder.cd("../../qml/SensorView/templates");
+    _outFileName = IPEFolder.path() + "/" + val + ".qml";
+
+    QFile file(_outFileName);
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)){
+        qDebug()<< "file wasn't open! Sos! Do something with this pls.";
+        return;
+    }
+    QTextStream in(&file);
+    _outFileContent = in.readAll();
+    file.close();
 }
 
 void WidgetsEditorManager::setOutFileContent(const QString& val){
+
+   /// формируем путь к файлу вывода
    QFile file(_outFileName);
+
    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
        qDebug()<< "file wasn't open! Sos! Do something with this pls.";
        return;
    }
    QTextStream out(&file);
-   out << val;
+   out << "ComplexWidget" << val;
    file.close();
+}
+
+void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategories){
+
+    /// 1. объединить существующую карту по виджетам и категориям
+    qDebug() << "new line: " << newWidgetCategories;
+    qDebug() << "new line jsn: " << QJsonDocument::fromJson(newWidgetCategories.toUtf8()).object();
+    QJsonValue newWidgetCategoriesJsn =  QJsonDocument::fromJson(newWidgetCategories.toUtf8()).object();
+    QJsonArray allWidgetsCategoriesJsn;
+    allWidgetsCategoriesJsn.append(_existingWidgetsJsn);
+    allWidgetsCategoriesJsn.append(newWidgetCategoriesJsn);
+    QString allWidgetsCategories(QJsonDocument(allWidgetsCategoriesJsn).toJson());
+
+    /// избавиться от квадратных кавычек и добавить строку впереди, чтобы как было изначально
+    qDebug()<< "new content of widgets file of length " << allWidgetsCategories.length()<<": " << allWidgetsCategories;
+    allWidgetsCategories = "var personal =" + allWidgetsCategories.mid(2, allWidgetsCategories.length() - 4);
+
+    /// 2. записать объединение в файл
+    QDir IPEFolder = QDir(_IPEFolder);
+    IPEFolder.cd("../../qml/SensorView/scripts");
+    QFile file(IPEFolder.path() + "/views.js");
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+        qDebug()<< "file wasn't open! Sos! Do something with this pls.";
+        return;
+    }
+    QTextStream out(&file);
+    qDebug()<< "new content of widgets file: " << allWidgetsCategories;
+    out << allWidgetsCategories;
+
+    file.close();
 }
 
 

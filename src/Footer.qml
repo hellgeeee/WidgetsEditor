@@ -24,12 +24,14 @@ Rectangle {
     }
 
     Row{
-        anchors.centerIn: parent
+       anchors.centerIn: parent
         Text {
             id: txt
-            text: qsTr("Всего выбрано: " + selectedItemsCount + " из " + availableItemsCount)
+            text: qsTr("Выбрано: " + selectedItemsCount + " из " + availableItemsCount)
             //anchors {right: closeButton.left; verticalCenter: parent.verticalCenter}
             font: appFont
+            height: stringHeight
+            verticalAlignment: Text.AlignVCenter
         }
 
         Item{ width: smallGap; height: 1 }
@@ -37,20 +39,18 @@ Rectangle {
         Image {
             id: closeButton
             source: "qrc:/../rs/svg/close-button.svg"
-            height: parent.height
+            height: stringHeight - smallGap
             width: height
+            anchors.verticalCenter: parent.verticalCenter
 
             MouseArea {
                 id: closeBtn
                 anchors.fill: parent
                 hoverEnabled: true
+                ToolTip.visible: containsMouse
+                ToolTip.text: "Снять выделения";
             }
 
-            ToolTip{
-                visible: closeBtn.containsMouse
-                text: "Сброс выделения";
-                y: stringHeight
-            }
         }
     }
 }

@@ -12,7 +12,7 @@ Item{
    property alias attributeLowerBondary: lowerBondary.checked
    property alias attributeIcon: attributeIcon.text
 
-   visible: attributesContainer.isEnoughRoomToShow && selectedParameters != []
+   visible: attributesContainer.isEnoughRoomToShow
    enabled: curentMode === Mode.EditingMode.GRAPHIC_EDITING
 
    AttributeFieldPre{
@@ -48,7 +48,7 @@ Item{
    AttributeFieldText{
        id : attributeSignature
        anchors{
-           top: attributeIndex.bottom
+           top: attributeIndex.bottom; topMargin: smallGap * 2
            left: attributeSignaturePrefix.right; right: parent.right
        }
        placeholderText: qsTr("Любые символы до 255 знаков")
@@ -100,10 +100,14 @@ Item{
        id : attributeIcon
        visible: bar.currentIndex === 1
        anchors{
-           top: isShowBondaries.bottom
+           top: isShowBondaries.bottom; topMargin: smallGap*2
            left: attributeIconPrefix.right; right: parent.right
        }
        placeholderText: qsTr("Любые символы до 255 знаков")
+
+       /// Почему здесь определили тултип: потому, что этот тултип рядом со своей кнопкой saveButtonMa не становится в правильную позицию, с (у меня нет идей, почему, может, из-за поворота -90)
+       ToolTip.visible: saveButtonMa.containsMouse
+       ToolTip.text: "Перевести отредактированные атрибуты в текстовый формат"
    }
 
    Image {
@@ -114,12 +118,13 @@ Item{
        width: height
        rotation: -90
        anchors {
-           top: attributeIcon.bottom; topMargin: smallGap
-           right: attributeIcon.right
+           bottom: parent.bottom
+           right: parent.right
+           margins: smallGap
        }
 
        MouseArea {
-           id: ma
+           id: saveButtonMa
            anchors.fill: parent
            hoverEnabled: true
            onClicked: {
@@ -127,12 +132,8 @@ Item{
                editingArea.paramsToJson()
                doneSound.play()
            }
+
        }
 
-       ToolTip{
-           visible: ma.containsMouse
-           text: "Сорханить атрибуты";
-           y: stringHeight
-       }
    }
 }

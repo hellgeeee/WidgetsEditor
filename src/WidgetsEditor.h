@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QDir>
+#include <QJsonObject>
 
 #include<QDebug>
 
@@ -23,16 +24,22 @@ public:
     }
     QString name() { return _name; }
     void setName(const QString& name) { _name = name; }
+
     int indexCur() { return _indexCur; }
     void setIndexCur(const int& indexCur) { _indexCur = indexCur; }
+
     QString signatureCur() { return _signatureCur; }
     void setSignatureCur(const QString& signatureCur) { _signatureCur = signatureCur; }
+
     bool upperBoundaryCur() { return _upperBoundaryCur; }
     void setUpperBoundaryCur(const bool& upperBoundaryCur) { _upperBoundaryCur = upperBoundaryCur; }
+
     bool lowerBoundaryCur() { return _upperBoundaryCur; }
     void setLowerBoundaryCur(const bool& lowerBoundaryCur) { _lowerBoundaryCur = lowerBoundaryCur; }
+
     QString imageCur() { return _imageCur; }
     void setImageCur(const QString& image) { _imageCur = image; }
+
 private:
     QString _name{""};
     int _indexCur{-1};
@@ -40,6 +47,7 @@ private:
     bool _upperBoundaryCur{false};
     bool _lowerBoundaryCur{false};
     QString _imageCur{""};
+
 signals:
     void nameChanged();
     void indexCurChanged();
@@ -57,14 +65,17 @@ class DeviceCategory : public QObject{
 
 public:
     DeviceCategory( const QString& name = "", QObject* parent = nullptr);
+
     QString name() { return _name; }
     void setName(const QString& name) { _name = name; }
+
     QVariant parameters() { return QVariant::fromValue(_parameters); }
     void addParameter(const QString& name) { _parameters.append(new CategoryParameter(name, this)); }
-//    void setAttributes(const QVariant& attributes) { /*_attributes = attributes.toList();*/ }
+
 private:
     QString _name;
     QList<QObject*> _parameters;
+
 signals:
     void nameChanged();
     void attributesChanged();
@@ -73,57 +84,39 @@ signals:
 class WidgetsEditorManager : public QObject{
     Q_OBJECT
 
-    Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
-    Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
-    Q_PROPERTY(QString widgetsExistFileName READ widgetsExistFileName WRITE setWidgetsExistFileName NOTIFY widgetsExistFileNameChanged)
     Q_PROPERTY(QVariant categories READ categories NOTIFY categoriesChanged)
     Q_PROPERTY(QString outFileContent WRITE setOutFileContent NOTIFY outFileContentChanged)
-    Q_PROPERTY(QString curDir READ curDir NOTIFY curDirChanged)
+    Q_PROPERTY(QString IPEFolder READ IPEFolder WRITE setIPEFolder NOTIFY IPEFolderChanged)
+    Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
+    Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
+    Q_PROPERTY(QString selectedCategories WRITE setSelectedCategories NOTIFY selectedCategoriesChanged)
 
 public:
-    WidgetsEditorManager(QObject* parent = nullptr) : QObject(parent) {
-        QDir curDir = QDir::current();
-        curDir.cd("../doc/InOutFilesExample");
-        _curDir = curDir.path();
-    }
+    WidgetsEditorManager(QObject* parent = nullptr) : QObject(parent) {}
 
     QString inFileName(){ return _inFileName; }
-
-    void setInFileName(const QString& val){
-        _inFileName = val;
-        _categories = parse();
-
-        QDir curDir = QDir(_inFileName);
-        curDir.cdUp();
-        _curDir = curDir.path();
-    }
+    void setInFileName(const QString& val);
 
     QString outFileName(){ return _outFileName; }
+    void setOutFileName(const QString&);
 
-    void setOutFileName(const QString& val){
-        _outFileName = val;
-    }
-
-    QString widgetsExistFileName(){ return _widgetsExistFileName; }
-
-    void setWidgetsExistFileName(const QString& val){
-        _widgetsExistFileName = val;
-    }
-
-    QString curDir(){return _curDir;}
+    QString IPEFolder(){return _IPEFolder;}
+    void setIPEFolder(const QString& val){qDebug()<< "set IPEFolder: " + val; _IPEFolder = val;}
 
     QVariant categories(){ return QVariant::fromValue(_categories); }
-    void setCategories(QList<QObject*>);
+    void setCategories(QList<QObject*> val){ _categories = val; }
+
     void setOutFileContent(const QString&);
+    void setSelectedCategories(const QString&);
 
 private:
     QList<QObject*> parse();
     QString _inFileName{""};
     QString _outFileName{ "" };
-    QString _widgetsExistFileName{ "" };
     QList<QObject*> _categories;
     QString _outFileContent{ "" };
-    QString _curDir{ "" };
+    QString _IPEFolder{ "" };
+    QJsonObject _existingWidgetsJsn;
 signals:
     void inFileChanged();
     void outFileChanged();
@@ -131,5 +124,7 @@ signals:
     void widgetsExistFileNameChanged();
     void categoriesChanged();
     void curDirChanged();
+    void IPEFolderChanged();
+    void selectedCategoriesChanged();
 };
 #endif // WIDGETSEDITOR_H
