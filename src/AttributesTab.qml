@@ -6,11 +6,11 @@ import QtQuick.Controls.Styles 1.4 // for spinbox style
 Item{
    id : attributesTab
 
-   property alias attributeIndex: attributeIndex.value
-   property alias attributeSignature: attributeSignature.text
-   property alias attributeUpperBondary: upperBondary.checked
-   property alias attributeLowerBondary: lowerBondary.checked
-   property alias attributeIcon: attributeIcon.text
+   property alias indexCur: indexCur.value
+   property alias signatureCur: signatureCur.text
+   property alias uperBondaryCur: upperBondaryCur.checked
+   property alias lowerBondaryCur: lowerBondaryCur.checked
+   property alias imageCur: imageCur.text
 
    visible: attributesContainer.isEnoughRoomToShow
    enabled: curentMode === Mode.EditingMode.GRAPHIC_EDITING
@@ -20,16 +20,16 @@ Item{
 
        anchors{
            left: parent.left
-           verticalCenter: attributeIndex.verticalCenter
+           verticalCenter: indexCur.verticalCenter
        }
        text: qsTr("Индекс поля*")
    }
 
    SpinBox{
-       id : attributeIndex
+       id : indexCur
 
-       anchors.left: attributeSignature.left
-       width: attributeSignature.width
+       anchors.left: signatureCur.left
+       width: signatureCur.width
        height: font.pixelSize * 2 +1
        font: appFont
        editable: true
@@ -40,15 +40,16 @@ Item{
 
        anchors{
            left: attributeIndexPrefix.left
-           verticalCenter: attributeSignature.verticalCenter
+           verticalCenter: signatureCur.verticalCenter
        }
        text: qsTr("Подпись поля")
    }
 
    AttributeFieldText{
-       id : attributeSignature
+       id : signatureCur
+
        anchors{
-           top: attributeIndex.bottom; topMargin: smallGap * 2
+           top: indexCur.bottom; topMargin: smallGap * 2
            left: attributeSignaturePrefix.right; right: parent.right
        }
        placeholderText: qsTr("Любые символы до 255 знаков")
@@ -57,6 +58,7 @@ Item{
    /// следующие два атрибута должны появляться лишь в случае, если поле аналоговое, т.е. выбрана вкладка bar.currentIndex == 1
    AttributeFieldPre{
        id: isShowBondariesPrefix
+
        visible: bar.currentIndex === 1
        anchors{
            left: attributeIndexPrefix.left
@@ -69,18 +71,20 @@ Item{
        id: isShowBondaries
        visible: bar.currentIndex == 1
        anchors{
-           top: attributeSignature.bottom
+           top: signatureCur.bottom
            left: isShowBondariesPrefix.right; right: parent.right
            margins: smallGap
        }
        clip: true
        CheckBox {
-           id: upperBondary
+           id: upperBondaryCur
+
            text: qsTr("▲")
            font: appFont
        }
        CheckBox {
-           id: lowerBondary
+           id: lowerBondaryCur
+
            text: qsTr("▼")
            font: appFont
        }
@@ -88,16 +92,18 @@ Item{
 
    AttributeFieldPre{
        id: attributeIconPrefix
+
        visible: bar.currentIndex === 1
        anchors {
            left: attributeIndexPrefix.left
-           verticalCenter: attributeIcon.verticalCenter
+           verticalCenter: imageCur.verticalCenter
        }
        text: qsTr("Иконка поля")
    }
 
    AttributeFieldText{
-       id : attributeIcon
+       id : imageCur
+
        visible: bar.currentIndex === 1
        anchors{
            top: isShowBondaries.bottom; topMargin: smallGap*2
@@ -125,6 +131,7 @@ Item{
 
        MouseArea {
            id: saveButtonMa
+
            anchors.fill: parent
            hoverEnabled: true
            onClicked: {

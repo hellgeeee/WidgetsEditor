@@ -17,6 +17,7 @@ Rectangle {
 
     Image {
         id: categoryIcon
+
         anchors.fill: parent
         source: "qrc:/../rs/svg/settings_gears.svg"
         ColorOverlay {
@@ -58,11 +59,8 @@ Rectangle {
             selectedParameters = []
             selectedParametersCount = 0
 
-            // костыль
+            // костыль, почему-то не обновляется автоматически
             parametersList.model = curentParameters
         }
     }
-
-    /// граница
-    //Rectangle{anchors.fill: parent; anchors.topMargin: parent.height - smallGap * 0.5}
 }

@@ -85,7 +85,7 @@ class WidgetsEditorManager : public QObject{
     Q_OBJECT
 
     Q_PROPERTY(QVariant categories READ categories NOTIFY categoriesChanged)
-    Q_PROPERTY(QString outFileContent WRITE setOutFileContent NOTIFY outFileContentChanged)
+    Q_PROPERTY(QString outFileContent READ outFileContent WRITE setOutFileContent NOTIFY outFileContentChanged)
     Q_PROPERTY(QString IPEFolder READ IPEFolder WRITE setIPEFolder NOTIFY IPEFolderChanged)
     Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
     Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
@@ -101,11 +101,12 @@ public:
     void setOutFileName(const QString&);
 
     QString IPEFolder(){return _IPEFolder;}
-    void setIPEFolder(const QString& val){qDebug()<< "set IPEFolder: " + val; _IPEFolder = val;}
+    void setIPEFolder(const QString& val){ _IPEFolder = val; }
 
     QVariant categories(){ return QVariant::fromValue(_categories); }
     void setCategories(QList<QObject*> val){ _categories = val; }
 
+    QString outFileContent(){return _outFileContent;}
     void setOutFileContent(const QString&);
     void setSelectedCategories(const QString&);
 

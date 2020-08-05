@@ -147,7 +147,7 @@ Item {
 
         /// установка режима редактирования
         curentMode = Mode.EditingMode.GRAPHIC_EDITING
-        editingArea.deviceCategoriesList.model = widgetsEditorManager.categories
+        editingArea.categoriesModel = widgetsEditorManager.categories
 
         doneSound.play()
     }

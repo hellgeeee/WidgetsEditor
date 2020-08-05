@@ -14,9 +14,9 @@ TextArea{
     }
     height: font.pixelSize * 2.5
     width: parent.width
+    verticalAlignment: "AlignVCenter"
     font: appFont
     leftPadding: shift < 0 ? shift : smallGap
- verticalAlignment: "AlignVCenter"
 
     ToolTip.visible: hovered && shift < 0
     ToolTip.text: attributeField.text;

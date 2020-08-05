@@ -12,14 +12,11 @@ Item {
     id: editingArea
 
     property font appFont: deviceCategorySearch.font
-    property int prefixWidth: attributesContainer.width * 0.3
 
-    property alias attributesContainer: attributesContainer
+    property alias attributesModeCur: attributesContainer.mode
     property alias attributesTab: attributesTab
-    property alias deviceCategoriesList: deviceCategoriesList
+    property alias categoriesModel: deviceCategoriesList.model
     property alias parametersList: parametersList
-    property alias outputFileText: fileEdit.text
-    property alias outputFileName: outFileNameInput.text
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
     anchors.fill: parent
@@ -82,6 +79,7 @@ Item {
 
        ScrollLine {
            id: deviceCategoriesScroll
+
            height: scrollArea.height;
            width: smallGap
            scrollArea: deviceCategoriesList;
@@ -131,11 +129,13 @@ Item {
 
        ScrollLine {
            id: parametersScroll
+
            scrollArea: parametersList
            width: smallGap
            anchors {
                right: parametersList.right;
-               top: parent.top; bottom: parametersList.bottom
+               top: parent.top;
+               bottom: parametersList.bottom
            }
        }
 
@@ -146,10 +146,10 @@ Item {
            property int mode: bar.currentIndex
 
            visible: selectedParametersCount > 0
-           onVisibleChanged: print("visible: " + visible + " selectedParametersCount: " + selectedParametersCount)
            height: window.width * 0.3 // достаточно для расположения всевозможных атрибутов
            anchors{
-               right: parametersList.right; left: parametersList.left
+               right: parametersList.right;
+               left: parametersList.left
                bottom: deviceCategoriesList.bottom
            }
 
@@ -286,7 +286,8 @@ Item {
                    onClicked: {
                        /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
                        widgetsEditorManager.outFileName = outFileNameInput.text
-                       outputFileText = widgetsEditorManager.outFileContent
+                       fileEdit.text = widgetsEditorManager.outFileContent
+                       doneSound.play()
                    }
                    ToolTip.visible: containsMouse
                    ToolTip.text: qsTr("Прочитать выходной файл")
@@ -315,12 +316,12 @@ Item {
                    pause(5000).triggered.connect(function () {checked = false})
 
                    /// если файл уже есть, выдаем сообщение о его перезаписи
-                   widgetsEditorManager.outFileName = editingArea.outputFileName
+                   widgetsEditorManager.outFileName = outFileNameInput.text
 
 
                    /// пустое текстовое поле используем как показатель того, что пользователь ничего не редактировал
-                   if(editingArea.outputFileText === '' ||
-                       editingArea.outputFileText ===
+                   if(fileEdit.text === '' ||
+                       fileEdit.text ===
                        '"text_params": {},
                        "analog_params": {},
                        "param_icons": {}'){
@@ -343,8 +344,8 @@ Item {
                    }
                    else{
                        try {
-                           outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", editingArea.outputFileText))
-                           widgetsEditorManager.outFileContent = editingArea.outputFileText
+                           outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", fileEdit.text))
+                           widgetsEditorManager.outFileContent = fileEdit.text
                        } catch(e) {
                            errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
                            return
@@ -386,12 +387,11 @@ Item {
 
                    /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
                    widgetsEditorManager.outFileName = outFileNameInput.text
-                   outputFileText = widgetsEditorManager.outFileContent
+                   fileEdit.text = widgetsEditorManager.outFileContent
                }
            }
 
            Settings { property alias outputFileName: outFileNameInput.text }
-
        }
 
    function addOrReplace(curItemNum, selectedItems){
@@ -453,6 +453,7 @@ Item {
                        if(imageCur != "")
                        outFileContent["param_icons"][name] = imageCur
                    }
+
                    ///если же текстовая, надо удалить картинки из секции картинок
                    else
                        delete outFileContent["param_icons"][name]
@@ -466,7 +467,7 @@ Item {
            }
        }
 
-       fileEdit.text = /*"ComplexWidget" +*/ JSON.stringify(outFileContent, [], ' ')
+       fileEdit.text = JSON.stringify(outFileContent, [], ' ')
    }
 }
 

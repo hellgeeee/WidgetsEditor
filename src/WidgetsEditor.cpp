@@ -111,8 +111,6 @@ void WidgetsEditorManager::setOutFileContent(const QString& val){
 void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategories){
 
     /// 1. объединить существующую карту по виджетам и категориям
-    qDebug() << "new line: " << newWidgetCategories;
-    qDebug() << "new line jsn: " << QJsonDocument::fromJson(newWidgetCategories.toUtf8()).object();
     QJsonValue newWidgetCategoriesJsn =  QJsonDocument::fromJson(newWidgetCategories.toUtf8()).object();
     QJsonArray allWidgetsCategoriesJsn;
     allWidgetsCategoriesJsn.append(_existingWidgetsJsn);
@@ -120,7 +118,6 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
     QString allWidgetsCategories(QJsonDocument(allWidgetsCategoriesJsn).toJson());
 
     /// избавиться от квадратных кавычек и добавить строку впереди, чтобы как было изначально
-    qDebug()<< "new content of widgets file of length " << allWidgetsCategories.length()<<": " << allWidgetsCategories;
     allWidgetsCategories = "var personal =" + allWidgetsCategories.mid(2, allWidgetsCategories.length() - 4);
 
     /// 2. записать объединение в файл
@@ -133,9 +130,7 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
         return;
     }
     QTextStream out(&file);
-    qDebug()<< "new content of widgets file: " << allWidgetsCategories;
     out << allWidgetsCategories;
-
     file.close();
 }
 

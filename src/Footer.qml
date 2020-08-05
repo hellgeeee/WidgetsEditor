@@ -19,6 +19,7 @@ Rectangle {
 
     MouseArea{
         id: area;
+
         anchors.fill: parent;
         hoverEnabled: true
     }
@@ -38,6 +39,7 @@ Rectangle {
 
         Image {
             id: closeButton
+
             source: "qrc:/../rs/svg/close-button.svg"
             height: stringHeight - smallGap
             width: height
@@ -45,6 +47,7 @@ Rectangle {
 
             MouseArea {
                 id: closeBtn
+
                 anchors.fill: parent
                 hoverEnabled: true
                 ToolTip.visible: containsMouse

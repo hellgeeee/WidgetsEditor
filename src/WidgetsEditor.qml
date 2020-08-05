@@ -36,10 +36,15 @@ Item {
     height: 480
 
     WidgetsEditorMenu{id: menu}
+
     EditingArea{id: editingArea}
+
     InOutSettings{id: inOutSettings}
+
     Tutorial{id: tutorial}
+
     About{id: about}
+
     ErrorWnd{id: errorWnd}
 
     MediaPlayer{
@@ -93,6 +98,7 @@ Item {
 
     Image {
         id: closeButton
+
         source: "../rs/svg/close-button.svg"
         height: stringHeight - smallGap
         width: height
@@ -171,19 +177,19 @@ Item {
     }
 
     function writeParamFromGui(paramNum){
-        curentParameters[paramNum].indexCur = editingArea.attributesTab.attributeIndex
-        curentParameters[paramNum].signatureCur = editingArea.attributesTab.attributeSignature
-        curentParameters[paramNum].representType = editingArea.attributesContainer.mode
+        curentParameters[paramNum].indexCur = editingArea.attributesTab.indexCur
+        curentParameters[paramNum].signatureCur = editingArea.attributesTab.signatureCur
+        curentParameters[paramNum].representType = editingArea.attributesModeCur
         editingArea.parametersList.itemAtIndex(paramNum).description =
             curentParameters[paramNum].indexCur !== -1 ?
                 qsTr("Параметр " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
-                " с индексом " + editingArea.attributesTab.attributeIndex +
-                " и подписью \"" + editingArea.attributesTab.attributeSignature + "\" ") :
+                " с индексом " + editingArea.attributesTab.indexCur  +
+                     " и подписью \"" + editingArea.attributesTab.signatureCur + "\" ") :
                 ""
         if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
-            curentParameters[paramNum].upperBoundaryCur = editingArea.attributesTab.attributeUpperBondary
-            curentParameters[paramNum].lowerBoundaryCur = editingArea.attributesTab.attributeLowerBondary
-            curentParameters[paramNum].imageCur = editingArea.attributesTab.attributeIcon
+            curentParameters[paramNum].upperBoundaryCur = editingArea.attributesTab.upperBondaryCur
+            curentParameters[paramNum].lowerBoundaryCur = editingArea.attributesTab.lowerBondaryCur
+            curentParameters[paramNum].imageCur = editingArea.attributesTab.imageCur
             editingArea.parametersList.itemAtIndex(paramNum).image = Qt.resolvedUrl("../rs/svg/" + curentParameters[paramNum].imageCur + ".svg")
         }
     }

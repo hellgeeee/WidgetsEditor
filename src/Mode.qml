@@ -14,10 +14,4 @@ QtObject {
       TEXT = 0,
       ANALOG = 1
     }
-
-    enum FileChoosing {
-      IN_FILE = 0,
-      OUT_FILE = 1,
-      EXISTING_WIDGETS_FILE
-    }
 }

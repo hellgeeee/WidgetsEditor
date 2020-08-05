@@ -61,10 +61,10 @@ Item {
             " с индексом " + curentParameters[index].indexCur +
             " и подписью \"" + curentParameters[index].signatureCur + "\" ") :
             ""
-    property url image:{
-        return curentParameters[index].imageCur !== "" ?
+    property url image:
+            curentParameters[index].imageCur !== "" ?
             Qt.resolvedUrl("../rs/svg/" + curentParameters[index].imageCur + ".svg") :
-            ""}
+            "" // todo
     width: parent.width
     height: stringHeight * 2 // todo make width dependent on content
 

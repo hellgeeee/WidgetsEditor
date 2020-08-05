@@ -29,7 +29,9 @@ Rectangle{
         Image {
             id: menuItemIcon
             width: height
-            height: parent.height - smallGap
+            height: Math.min( window.height, window.width) * 0.18 - smallGap
+            anchors.verticalCenter: parent.verticalCenter
+
             source: "qrc:/../rs/svg/settings_gears.svg" // todo
             ColorOverlay {
                 anchors.fill: parent
@@ -51,7 +53,7 @@ Rectangle{
 
             wrapMode: Text.WrapAnywhere
             anchors.verticalCenter: parent.verticalCenter
-            font: typeof(EditingArea.appFont) !== "undefined" ?  EditingArea.appFont : font
+            font: typeof(appFont) !== "undefined" ?  appFont : font
             color: tile.curColor
         }
 
