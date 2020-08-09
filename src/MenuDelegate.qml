@@ -7,30 +7,33 @@ Rectangle{
     property alias text: titleText.text
     property bool selected: ma.containsMouse
     property int mode
-    property int length: text.length*titleText.font.pixelSize*0.8 + delimiter.width
 
-    height: window.height * 0.18;
-    width: 1
+    width: parent.width
+    height: parent.height * 0.2
+    border.color: borderColor
+    color: "white"
 
-    Row {
+    Rectangle{
         id: tile
 
         property color curColor: selected ? "#000000" : "#303030"
 
         anchors{
             fill: parent
-            leftMargin: - length * 0.5
+            margins: smallGap * 0.5
         }
-
-        scale: selected ? 1.5 : 1.0
+        scale: selected ? 1 : 0.75
         Behavior on scale { PropertyAnimation { duration: 300 } }
         Behavior on curColor { ColorAnimation { duration: 300 } }
 
         Image {
             id: menuItemIcon
             width: height
-            height: Math.min( window.height, window.width) * 0.18 - smallGap
-            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height * 0.6
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
 
             source: "qrc:/../rs/svg/settings_gears.svg" // todo
             ColorOverlay {
@@ -40,38 +43,27 @@ Rectangle{
             }
         }
 
-        /// border
-        Rectangle{
-            id: delimiter
-
-            width: stringHeight
-            height: 1
-        }
-
         Text {
             id: titleText
 
             wrapMode: Text.WrapAnywhere
-            anchors.verticalCenter: parent.verticalCenter
+            anchors{
+                verticalCenter: parent.verticalCenter
+                left: menuItemIcon.right
+            }
+
             font: typeof(appFont) !== "undefined" ?  appFont : font
             color: tile.curColor
         }
-
     }
 
     MouseArea {     //Rectangle{anchors.fill: parent; color: "#80f000ff"}
         id: ma
-        anchors{
-            left: tile.left; leftMargin: -(menu.anchors.leftMargin + tile.anchors.leftMargin)
-            top: tile.top;
-            bottom: tile.bottom
-        }
-        width: window.width
+        anchors.fill: parent
         hoverEnabled: true
         onClicked: {
-            curentMode = mode;
-            parent.parent.visible = false // todo странно, посмотреть
+            curentMode = mode
+            menu.height = 0
         }
-    }
-
+}
 }

@@ -1,33 +1,38 @@
 import QtQuick 2.10
 
 Column{
-    id: col
 
-    visible: curentMode === Mode.EditingMode.SETTINGS
+    visible: height > 0
     anchors{
-        fill: parent
-        margins: stringHeight
-        leftMargin: window.width * 0.5
+        top: settingsButton.bottom
+        right: parent.right; rightMargin: smallGap
+    }
+    width: Math.min(220, window.width * 0.25)
+    height: 0
+    clip: true
+    z: 1
+
+    Behavior on height {
+        PropertyAnimation {
+            duration: 500;
+            easing.type: Easing.InQuart
+        }
     }
 
     MenuDelegate{
-        text: qsTr("<h2>Редактирование в графическом режиме</h2>")
+        text: qsTr("<h4>Редактирование виджета</h4>")
         mode: Mode.EditingMode.GRAPHIC_EDITING
     }
-    MenuDelegate{
-        text: qsTr("<h2>Редактирование в текстовом режиме</h2>")
-        mode: Mode.EditingMode.TEXT_EDITING
-    }
    MenuDelegate{
-       text: qsTr("<h2>Настройки файлов ввода и вывода данных</h2>")
+       text: qsTr("<h4>Файлы ввода данных</h4>")
        mode: Mode.EditingMode.IN_OUT_SETTINGS
    }
    MenuDelegate{
-       text: qsTr("<h2>Приступая к работе</h2>")
+       text: qsTr("<h4>Приступая к работе</h4>")
        mode: Mode.EditingMode.TUTORIAL
    }
    MenuDelegate{
-       text: qsTr("<h2>О Виджите</h2>")
+       text: qsTr("<h4>О Виджите</h4>")
        mode: Mode.EditingMode.ABOUT
    }
 

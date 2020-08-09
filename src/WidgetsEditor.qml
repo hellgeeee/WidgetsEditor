@@ -17,11 +17,15 @@ Item {
     id: window
 
     property int curentMode: Mode.EditingMode.IN_OUT_SETTINGS
-
     property bool loading: false
-    property int stringHeight : window.width * 0.04
-    property int smallGap : window.width * 0.01
+
+    /// основное мерило - высота строчки - должно колебаться 30 - 16 px
+    property int stringHeight : Math.min(30, Math.max(16, window.width * 0.05))
+    property int smallGap : stringHeight * 0.2
     property font appFont: editingArea.appFont
+    property color textColor: "#303030"
+    property color borderColor: "lightgray"
+
 
     property var outFileContent: JSON.parse('{}')
 
@@ -75,7 +79,7 @@ Item {
 
         source: "qrc:/../rs/svg/settings_gears.svg"
         smooth: true
-        height: stringHeight
+        height: stringHeight - smallGap
         width: height
         anchors {
             top: closeButton.top
@@ -85,14 +89,9 @@ Item {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: {
-                curentMode = (curentMode!== Mode.EditingMode.SETTINGS ? Mode.EditingMode.SETTINGS : Mode.EditingMode.GRAPHIC_EDITING)
-
-                /// костыль, почему-то не обновляется само собой
-                menu.visible = curentMode === Mode.EditingMode.SETTINGS
-            }
+            onClicked: menu.height === 0 ? menu.height = window.height  * 0.3 : menu.height = 0//menu.visible = !menu.visible
             ToolTip.visible: containsMouse
-            ToolTip.text: "Настройки"
+            ToolTip.text: "Опции"
         }
     }
 
@@ -168,8 +167,8 @@ Item {
     function resetParam(paramNum){
         curentParameters[paramNum].indexCur = -1
         curentParameters[paramNum].signatureCur = ""
-        curentParameters[paramNum].upperBoundaryCur = false
-        curentParameters[paramNum].lowerBoundaryCur = false
+        curentParameters[paramNum].upperBoundCur = false
+        curentParameters[paramNum].lowerBoundCur = false
         curentParameters[paramNum].imageCur = ""
         curentParameters[paramNum].representType = -1
         editingArea.parametersList.itemAtIndex(paramNum).image = ""
@@ -182,15 +181,18 @@ Item {
         curentParameters[paramNum].representType = editingArea.attributesModeCur
         editingArea.parametersList.itemAtIndex(paramNum).description =
             curentParameters[paramNum].indexCur !== -1 ?
-                qsTr("Параметр " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
+                qsTr("<i><small>Параметр " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
                 " с индексом " + editingArea.attributesTab.indexCur  +
-                     " и подписью \"" + editingArea.attributesTab.signatureCur + "\" ") :
+                     "\nи подписью \"" + editingArea.attributesTab.signatureCur + "\" </i></small>") :
                 ""
         if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
-            curentParameters[paramNum].upperBoundaryCur = editingArea.attributesTab.upperBondaryCur
-            curentParameters[paramNum].lowerBoundaryCur = editingArea.attributesTab.lowerBondaryCur
+            curentParameters[paramNum].upperBoundCur = editingArea.attributesTab.upperBoundCur
+            curentParameters[paramNum].lowerBoundCur = editingArea.attributesTab.lowerBoundCur
             curentParameters[paramNum].imageCur = editingArea.attributesTab.imageCur
-            editingArea.parametersList.itemAtIndex(paramNum).image = Qt.resolvedUrl("../rs/svg/" + curentParameters[paramNum].imageCur + ".svg")
+            editingArea.parametersList.itemAtIndex(paramNum).image =
+                    curentParameters[paramNum].imageCur !== "" ?
+                        Qt.resolvedUrl("../rs/svg/" + curentParameters[paramNum].imageCur + ".svg") :
+                        ""
         }
     }
 

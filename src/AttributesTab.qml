@@ -2,18 +2,20 @@ import QtQuick 2.2
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4 // for spinbox style
+import Qt.labs.settings 1.0
 
 Item{
    id : attributesTab
 
    property alias indexCur: indexCur.value
    property alias signatureCur: signatureCur.text
-   property alias uperBondaryCur: upperBondaryCur.checked
-   property alias lowerBondaryCur: lowerBondaryCur.checked
+   property alias upperBoundCur: upperBoundCur.checked
+   property alias lowerBoundCur: lowerBoundCur.checked
    property alias imageCur: imageCur.text
 
-   visible: attributesContainer.isEnoughRoomToShow
+   visible: attributesContainer.visible
    enabled: curentMode === Mode.EditingMode.GRAPHIC_EDITING
+
 
    AttributeFieldPre{
        id: attributeIndexPrefix
@@ -22,15 +24,19 @@ Item{
            left: parent.left
            verticalCenter: indexCur.verticalCenter
        }
+       width: parent.width * 0.5
        text: qsTr("Индекс поля*")
    }
 
    SpinBox{
        id : indexCur
 
-       anchors.left: signatureCur.left
-       width: signatureCur.width
-       height: font.pixelSize * 2 +1
+       anchors{
+           left: attributeIndexPrefix.right
+           right: parent.right;
+           margins: smallGap
+       }
+       height: stringHeight - smallGap
        font: appFont
        editable: true
    }
@@ -39,9 +45,10 @@ Item{
        id: attributeSignaturePrefix
 
        anchors{
-           left: attributeIndexPrefix.left
+           left: parent.left
            verticalCenter: signatureCur.verticalCenter
        }
+       width: parent.width * 0.5
        text: qsTr("Подпись поля")
    }
 
@@ -49,9 +56,12 @@ Item{
        id : signatureCur
 
        anchors{
-           top: indexCur.bottom; topMargin: smallGap * 2
-           left: attributeSignaturePrefix.right; right: parent.right
+           left: attributeSignaturePrefix.right
+           top: indexCur.bottom
+           right: parent.right;
+           margins: smallGap
        }
+       height: stringHeight - smallGap
        placeholderText: qsTr("Любые символы до 255 знаков")
    }
 
@@ -61,9 +71,10 @@ Item{
 
        visible: bar.currentIndex === 1
        anchors{
-           left: attributeIndexPrefix.left
+           left: parent.left
            verticalCenter: isShowBondaries.verticalCenter
        }
+       width: parent.width * 0.5
        text: qsTr("Показывать границы *")
    }
 
@@ -71,22 +82,28 @@ Item{
        id: isShowBondaries
        visible: bar.currentIndex == 1
        anchors{
+           left: isShowBondariesPrefix.right
+           right: parent.right;
            top: signatureCur.bottom
-           left: isShowBondariesPrefix.right; right: parent.right
            margins: smallGap
        }
+       height: stringHeight
        clip: true
        CheckBox {
-           id: upperBondaryCur
+           id: upperBoundCur
 
            text: qsTr("▲")
            font: appFont
+           height: stringHeight - smallGap
+           width: height
        }
        CheckBox {
-           id: lowerBondaryCur
+           id: lowerBoundCur
 
            text: qsTr("▼")
            font: appFont
+           height: stringHeight - smallGap
+           width: height
        }
    }
 
@@ -95,9 +112,10 @@ Item{
 
        visible: bar.currentIndex === 1
        anchors {
-           left: attributeIndexPrefix.left
+           left: parent.left
            verticalCenter: imageCur.verticalCenter
        }
+       width: parent.width * 0.5
        text: qsTr("Иконка поля")
    }
 
@@ -106,14 +124,18 @@ Item{
 
        visible: bar.currentIndex === 1
        anchors{
-           top: isShowBondaries.bottom; topMargin: smallGap*2
-           left: attributeIconPrefix.right; right: parent.right
+           left: attributeIconPrefix.right
+           top: isShowBondaries.bottom;
+           right: parent.right;
+           margins: smallGap
        }
+       height: stringHeight - smallGap
+
        placeholderText: qsTr("Любые символы до 255 знаков")
 
        /// Почему здесь определили тултип: потому, что этот тултип рядом со своей кнопкой saveButtonMa не становится в правильную позицию, с (у меня нет идей, почему, может, из-за поворота -90)
        ToolTip.visible: saveButtonMa.containsMouse
-       ToolTip.text: "Перевести отредактированные атрибуты в текстовый формат"
+       ToolTip.text: "Сохранить текущий параметр \n(произойдет автоматически, когда перейдете на следующий)"
    }
 
    Image {
@@ -137,10 +159,8 @@ Item{
            onClicked: {
                writeParamFromGui(selectedParameters[selectedParametersCount - 1])
                editingArea.paramsToJson()
-               doneSound.play()
+               //doneSound.play()
            }
-
        }
-
    }
 }

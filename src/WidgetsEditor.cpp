@@ -11,12 +11,13 @@
 #include <QJsonArray>
 
 #include<QDebug>
+#include <QRegularExpression>
 
 QList<QObject*> WidgetsEditorManager::parse()
 {
     /// 1. Считать те категории устройств, для которых виджеты уже существуют
     QDir IPEFolder = QDir(_IPEFolder);
-    IPEFolder.cd("../../qml/SensorView/scripts");
+    IPEFolder.cd("qml/SensorView/scripts");
 
     QFile file(IPEFolder.path() + "/views.js");
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -26,6 +27,7 @@ QList<QObject*> WidgetsEditorManager::parse()
 
     QSet<QString> existingWidgetsCategories;
     if(str != ""){
+
         /// избавляемся от "var personal = "
         str = str.replace(0, str.indexOf("{"), "");
 
@@ -58,10 +60,31 @@ QList<QObject*> WidgetsEditorManager::parse()
     QList<QObject*> deviceCategories;
     auto categoriesJsn = jsn["types"].toObject();
     for(auto category : categoriesJsn.keys() ){
+
+        /// не берем данную категорию устройств, если для нее хоть что-то из перечисленного выполнилось:
+        /// - нет параметров
+        /// - уже есть виджет,
+        /// - она содержат аттрибут "abstract": "true"
+        /// - наследованиях типа нет типа "SpatialObject" или  "MoveableObject"
+        auto attrs = categoriesJsn[category].toObject()["attributes"].toObject();
+        bool isAbstract = attrs.keys().contains("abstract") && attrs["abstract"] == "true";
+
+        auto heritages = categoriesJsn[category].toObject()["is"].toArray();
+        bool isPropperHeritage = false;
+        for(auto heritage : heritages)
+            if(heritage == "SpatialObject" || heritage == "MoveableObject"){
+                isPropperHeritage = true;
+                break;
+            }
         auto parameters = categoriesJsn[category].toObject()["param"].toObject().keys();
-        if(parameters.count() == 0 || existingWidgetsCategories.contains(category))
+
+        /// 3. Запомнить каждую категорию (по имени), если подходит вместе со всеми ее параметрами
+        if(parameters.count() == 0 || existingWidgetsCategories.contains(category) || isAbstract || !isPropperHeritage)
             continue;
-        auto categoryO = new DeviceCategory(category, this);
+        QString categoryImage = categoriesJsn[category].toObject()["attributes"].toObject()["image"].toString();
+        if(categoryImage != "" && !QFile(_IPEFolder + "/build_editor/Release_x64/media/sensors/" + categoryImage).exists())
+            categoryImage = "";
+        auto categoryO = new DeviceCategory(category, categoryImage, this);
         deviceCategories.append(categoryO);
         for(auto paremeter : parameters)
             categoryO->addParameter(paremeter);
@@ -69,8 +92,9 @@ QList<QObject*> WidgetsEditorManager::parse()
     return deviceCategories;
 }
 
-DeviceCategory::DeviceCategory(const QString& name, QObject* parent) : QObject(parent) {
+DeviceCategory::DeviceCategory(const QString& name, const QString& image, QObject* parent) : QObject(parent) {
     _name = name;
+    _image = image;
 }
 
 void WidgetsEditorManager::setInFileName(const QString& val){
@@ -81,7 +105,7 @@ void WidgetsEditorManager::setInFileName(const QString& val){
 void WidgetsEditorManager::setOutFileName(const QString& val){
 
     QDir IPEFolder = QDir(_IPEFolder);
-    IPEFolder.cd("../../qml/SensorView/templates");
+    IPEFolder.cd("qml/SensorView/templates");
     _outFileName = IPEFolder.path() + "/" + val + ".qml";
 
     QFile file(_outFileName);
@@ -94,17 +118,29 @@ void WidgetsEditorManager::setOutFileName(const QString& val){
     file.close();
 }
 
-void WidgetsEditorManager::setOutFileContent(const QString& val){
+void WidgetsEditorManager::setOutFileContent(const QString& contentJsonFormated){
+
+    QString contentJsFormated = contentJsonFormated;
+
+   /// число в любых кавычках и следующее за ним двоеточие после любого количества пробелов и табуляций и новых строк
+   QRegularExpression re("(\"|\')(\\d+)(\"|\')([ \t\n]*:)");
+   QRegularExpressionMatch match = re.match(contentJsFormated);
+   while (match.hasMatch()) {
+       contentJsFormated.replace(match.captured(1)+ match.captured(2) + match.captured(3), match.captured(2));
+       match = re.match(contentJsFormated);
+   }
+   contentJsFormated.replace("\"text_params\"", "text_params");
+   contentJsFormated.replace("\"analog_params\"", "analog_params");
+   contentJsFormated.replace("\"param_icons\"", "param_icons");
 
    /// формируем путь к файлу вывода
    QFile file(_outFileName);
-
    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
        qDebug()<< "file wasn't open! Sos! Do something with this pls.";
        return;
    }
    QTextStream out(&file);
-   out << "ComplexWidget" << val;
+   out << "import QtQuick 2.0 \n import \"../../Components\"\n\nComplexWidget" << contentJsFormated;
    file.close();
 }
 
@@ -117,12 +153,18 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
     allWidgetsCategoriesJsn.append(newWidgetCategoriesJsn);
     QString allWidgetsCategories(QJsonDocument(allWidgetsCategoriesJsn).toJson());
 
+    /// избавиться от пары лишних фигурных скобок "},{" в результате слияния 2-х json-объектов
+    QRegularExpression re("([ \t\n]*},[ \t\n]*{[ \t\n]*)");
+    QRegularExpressionMatch match = re.match(allWidgetsCategories);
+    if(match.hasMatch())
+        allWidgetsCategories.replace(match.captured(), ",\n");
+
     /// избавиться от квадратных кавычек и добавить строку впереди, чтобы как было изначально
     allWidgetsCategories = "var personal =" + allWidgetsCategories.mid(2, allWidgetsCategories.length() - 4);
 
     /// 2. записать объединение в файл
     QDir IPEFolder = QDir(_IPEFolder);
-    IPEFolder.cd("../../qml/SensorView/scripts");
+    IPEFolder.cd("qml/SensorView/scripts");
     QFile file(IPEFolder.path() + "/views.js");
 
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
@@ -137,6 +179,7 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
 
 int main(int argc, char *argv[])
 {
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setOrganizationName("Integra-s");
     QGuiApplication app(argc, argv);

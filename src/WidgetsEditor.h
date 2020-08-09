@@ -14,8 +14,8 @@ class CategoryParameter : public QObject{
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(int indexCur READ indexCur WRITE setIndexCur NOTIFY indexCurChanged)
     Q_PROPERTY(QString signatureCur READ signatureCur WRITE setSignatureCur NOTIFY signatureCurChanged)
-    Q_PROPERTY(bool upperBoundaryCur READ upperBoundaryCur WRITE setUpperBoundaryCur NOTIFY upperBoundaryCurChanged)
-    Q_PROPERTY(bool lowerBoundaryCur READ lowerBoundaryCur WRITE setLowerBoundaryCur NOTIFY lowerBoundaryCurChanged)
+    Q_PROPERTY(bool upperBoundCur READ upperBoundCur WRITE setUpperBoundCur NOTIFY upperBoundCurChanged)
+    Q_PROPERTY(bool lowerBoundCur READ lowerBoundCur WRITE setLowerBoundCur NOTIFY lowerBoundCurChanged)
     Q_PROPERTY(QString imageCur READ imageCur WRITE setImageCur NOTIFY imageCurChanged)
 
 public:
@@ -31,11 +31,11 @@ public:
     QString signatureCur() { return _signatureCur; }
     void setSignatureCur(const QString& signatureCur) { _signatureCur = signatureCur; }
 
-    bool upperBoundaryCur() { return _upperBoundaryCur; }
-    void setUpperBoundaryCur(const bool& upperBoundaryCur) { _upperBoundaryCur = upperBoundaryCur; }
+    bool upperBoundCur() { return _upperBoundCur; }
+    void setUpperBoundCur(const bool& upperBoundCur) { _upperBoundCur = upperBoundCur; }
 
-    bool lowerBoundaryCur() { return _upperBoundaryCur; }
-    void setLowerBoundaryCur(const bool& lowerBoundaryCur) { _lowerBoundaryCur = lowerBoundaryCur; }
+    bool lowerBoundCur() { return _upperBoundCur; }
+    void setLowerBoundCur(const bool& lowerBoundCur) { _lowerBoundCur = lowerBoundCur; }
 
     QString imageCur() { return _imageCur; }
     void setImageCur(const QString& image) { _imageCur = image; }
@@ -44,16 +44,16 @@ private:
     QString _name{""};
     int _indexCur{-1};
     QString _signatureCur{"undefined"};
-    bool _upperBoundaryCur{false};
-    bool _lowerBoundaryCur{false};
+    bool _upperBoundCur{false};
+    bool _lowerBoundCur{false};
     QString _imageCur{""};
 
 signals:
     void nameChanged();
     void indexCurChanged();
     void signatureCurChanged();
-    void upperBoundaryCurChanged();
-    void lowerBoundaryCurChanged();
+    void upperBoundCurChanged();
+    void lowerBoundCurChanged();
     void imageCurChanged();
 };
 
@@ -61,23 +61,29 @@ class DeviceCategory : public QObject{
     Q_OBJECT
 
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged )
-    Q_PROPERTY(QVariant parameters READ parameters/* WRITE setAttributes */ NOTIFY attributesChanged)
+    Q_PROPERTY(QString image READ image NOTIFY imageChanged )
+    Q_PROPERTY(QVariant parameters READ parameters NOTIFY attributesChanged)
 
 public:
-    DeviceCategory( const QString& name = "", QObject* parent = nullptr);
+    DeviceCategory( const QString& name = "", const QString& image = "", QObject* parent = nullptr);
 
     QString name() { return _name; }
     void setName(const QString& name) { _name = name; }
+
+    QString image() { return _image; }
+    void setImage(const QString& image) { _image = image; }
 
     QVariant parameters() { return QVariant::fromValue(_parameters); }
     void addParameter(const QString& name) { _parameters.append(new CategoryParameter(name, this)); }
 
 private:
     QString _name;
+    QString _image;
     QList<QObject*> _parameters;
 
 signals:
     void nameChanged();
+    void imageChanged();
     void attributesChanged();
 };
 
@@ -101,7 +107,11 @@ public:
     void setOutFileName(const QString&);
 
     QString IPEFolder(){return _IPEFolder;}
-    void setIPEFolder(const QString& val){ _IPEFolder = val; }
+    void setIPEFolder(const QString& val){
+        QDir exeDir(val);
+        exeDir.cd("../../");
+        _IPEFolder = exeDir.path();
+    }
 
     QVariant categories(){ return QVariant::fromValue(_categories); }
     void setCategories(QList<QObject*> val){ _categories = val; }

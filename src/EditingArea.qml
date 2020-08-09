@@ -20,38 +20,53 @@ Item {
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
     anchors.fill: parent
-
     AttributeFieldText{
         id: deviceCategorySearch
 
+        bBorder: 0
         height: stringHeight
+        width: deviceCategoriesList.width
         anchors{
-           left: deviceCategoriesList.left;
-           right: deviceCategoriesList.right
+           left: parent.left;
+           top: parent.top
         }
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
-        font.pixelSize: window.width * 0.02
+        font.pixelSize: stringHeight * 0.5
         z: 1
+    }
+
+
+    Text{
+        id: categoriesListEmptyText
+        visible: categoriesInfoLine.availableItemsCount === 0
+        text: "Категории не выбраны"
+        anchors.centerIn: deviceCategoriesList
+        font: appFont
+        color: borderColor
     }
 
     ListView {
        id: deviceCategoriesList
 
-       width: window.width * 0.25
+       width: stringHeight * 4
        anchors {
            top: deviceCategorySearch.bottom;
            bottom: parent.bottom
        }
+       clip: true
        orientation: ListView.Vertical
 
        maximumFlickVelocity: 5000
        model: typeof(widgetsEditorManager) !== "undefined" ? widgetsEditorManager.categories : null//typeof(deviceCategoriesModel) !== "undefined" ? deviceCategoriesModel : null
 
        delegate: CategoryDelegate {}
+
+       Rectangle{anchors.fill: parent; color: "transparent"; border.color: borderColor}
     }
 
     Footer{
+        id: categoriesInfoLine
         selectedItemsCount: selectedCategoriesCount
         availableItemsCount: (typeof(deviceCategoriesList.model) !== "undefined" && deviceCategoriesList.model !== null) ? deviceCategoriesList.model.length : 0
         width: deviceCategoriesList.width
@@ -72,38 +87,49 @@ Item {
             })
 
             /// костыль! должно обновиться автоматически
-            attributesContainer.visible = false
+            parametersList.model = []
+            attributesContainer.height = 0
             fileEdit.text = ""
         }
     }
 
-       ScrollLine {
-           id: deviceCategoriesScroll
+   ScrollLine {
+       id: deviceCategoriesScroll
 
-           height: scrollArea.height;
-           width: smallGap
-           scrollArea: deviceCategoriesList;
-           anchors {
-               right: deviceCategoriesList.right;
-               top: parent.top;
-               bottom: parent.bottom
-           }
+       height: scrollArea.height;
+       width: smallGap
+       scrollArea: deviceCategoriesList;
+       anchors {
+           right: deviceCategoriesList.right;
+           top: deviceCategorySearch.bottom;
+           bottom: parent.bottom
        }
+   }
+
+   Text{
+       id: parametersListEmptyText
+       visible: pareamsInfoLine.availableItemsCount === 0
+       text: "Категории не выбраны"
+       anchors.centerIn: parametersList
+       font: appFont
+       color: borderColor
+   }
 
        ListView {
            id: parametersList
 
            anchors {
                left: deviceCategoriesList.right; leftMargin: stringHeight
-               right: fileEditContainer.left; rightMargin: stringHeight
-               top: parent.top
-               bottom: attributesContainer.isEnoughRoomToShow ? attributesContainer.top : parent.bottom
+               top: parent.top;
+               bottom:attributesContainer.top
            }
-           clip: true
+           width: stringHeight * 12
            model: curentParameters
            delegate: ParameterDelegate {}
 
+
            Footer{
+               id: pareamsInfoLine
                selectedItemsCount: selectedParametersCount
                availableItemsCount: curentParameters.length
                opacity: area.containsMouse || closeBtn.containsMouse ? 0.3 : parametersScroll.opacity * 0.3
@@ -121,10 +147,11 @@ Item {
                    })
 
                    /// костыль!
-                   attributesContainer.visible = false
+                   attributesContainer.height = 0
                    fileEdit.text = ""
                }
            }
+
        }
 
        ScrollLine {
@@ -139,13 +166,22 @@ Item {
            }
        }
 
-       Item{
+       Rectangle{
            id: attributesContainer
 
            property bool isEnoughRoomToShow: width - 70 > bar.height
            property int mode: bar.currentIndex
 
-           visible: selectedParametersCount > 0
+           Component.onCompleted: height = 0
+
+           Behavior on height {
+               PropertyAnimation {
+                   duration: 500;
+                   easing.type: Easing.InQuart
+               }
+           }
+
+           visible: height > 0
            height: window.width * 0.3 // достаточно для расположения всевозможных атрибутов
            anchors{
                right: parametersList.right;
@@ -189,6 +225,9 @@ Item {
                    topMargin: smallGap
                }
            }
+
+           /// рамка
+           Rectangle{color: "transparent"; anchors.fill: parent; border.color: borderColor}
        }
 
        Flickable {
@@ -196,10 +235,10 @@ Item {
 
            anchors{
                 right: parent.right
+                left: parametersList.right; leftMargin: stringHeight
                 top: deviceCategoriesList.top
                 bottom: parent.bottom; bottomMargin: stringHeight
            }
-           width: window.width * 0.3
            contentWidth: width;
            contentHeight: fileEdit.height
            clip: true
@@ -214,7 +253,6 @@ Item {
 
                width: parent.width;
                height: textHeight > window.height ? textHeight : window.height - stringHeight
-               enabled: curentMode === Mode.EditingMode.TEXT_EDITING
                wrapMode: TextEdit.WrapAnywhere
                placeholderText: qsTr("Пока что пусто")
                font: appFont
@@ -234,17 +272,48 @@ Item {
        }
 
 
-       AttributeFieldText{
-           id: outFileNameInput
+       Item{
 
            anchors{
                top: fileEditContainer.bottom
-               margins: 0
+               right: fileEditContainer.right
            }
-
            height: stringHeight
            width: fileEditContainer.width
-           placeholderText: qsTr("Имя выходного файла ")
+
+
+           AttributeFieldText{
+               id: outFileNameInput
+
+               rBorder: 0
+               placeholderText: qsTr("Выходной файл ")
+                anchors{
+                    right: outFileCoiceBtn.left
+                    left: parent.left
+                    top: parent.top
+                    bottom: parent.bottom
+                }
+
+               FileDialog {
+                   id: fileDialog
+
+                   title: qsTr("Выбор текстового файла вывода")
+                   folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
+                   nameFilters: [ "Text files (*.qml)", "All files (*)" ]
+                   onAccepted: {
+                       var fileNameNoExt = file.toString()
+                        outFileNameInput.text = fileNameNoExt.substring(fileNameNoExt.lastIndexOf("/")+1, fileNameNoExt.lastIndexOf("."))
+
+                       /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
+                       widgetsEditorManager.outFileName = outFileNameInput.text
+                       fileEdit.text = widgetsEditorManager.outFileContent
+                   }
+               }
+
+               Settings { property alias outputFileName: outFileNameInput.text }
+           }
+
+
 
            Image {
                id: outFileCoiceBtn
@@ -287,7 +356,7 @@ Item {
                        /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
                        widgetsEditorManager.outFileName = outFileNameInput.text
                        fileEdit.text = widgetsEditorManager.outFileContent
-                       doneSound.play()
+                       //doneSound.play()
                    }
                    ToolTip.visible: containsMouse
                    ToolTip.text: qsTr("Прочитать выходной файл")
@@ -329,20 +398,20 @@ Item {
                        return
                    }
 
-                   if(curentMode === Mode.EditingMode.GRAPHIC_EDITING) {
-
-                           widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
-
-                           /// создание строчки для записи в файл виджетов
-                           var selectedCategoriesJsn = JSON.parse('{}')
-                           selectedCategoriesJsn[outFileNameInput.text] = [];
-                           for (var i = 0; i < selectedCategoriesCount; i++)
-                               selectedCategoriesJsn[outFileNameInput.text].push(widgetsEditorManager.categories[selectedCategories[i]].name)
-                           var selectedCategoriesStr = JSON.stringify(selectedCategoriesJsn)
-                           //selectedCategoriesStr = selectedCategoriesStr.substring(1, selectedCategoriesStr.length-1)
-                           widgetsEditorManager.selectedCategories = selectedCategoriesStr
-                   }
-                   else{
+                   //if(curentMode === Mode.EditingMode.GRAPHIC_EDITING) {
+                   //
+                   //        widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
+                   //
+                       /// создание строчки для записи в файл виджетов
+                       var selectedCategoriesJsn = JSON.parse('{}')
+                       selectedCategoriesJsn[outFileNameInput.text] = [];
+                       for (var i = 0; i < selectedCategoriesCount; i++)
+                           selectedCategoriesJsn[outFileNameInput.text].push(widgetsEditorManager.categories[selectedCategories[i]].name)
+                       var selectedCategoriesStr = JSON.stringify(selectedCategoriesJsn)
+                       //selectedCategoriesStr = selectedCategoriesStr.substring(1, selectedCategoriesStr.length-1)
+                       widgetsEditorManager.selectedCategories = selectedCategoriesStr
+                   //}
+                   //{
                        try {
                            outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", fileEdit.text))
                            widgetsEditorManager.outFileContent = fileEdit.text
@@ -350,7 +419,7 @@ Item {
                            errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
                            return
                        }
-                   }
+                   //}
 
                    errorWnd.isQuestion = true
                    if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName)){
@@ -360,7 +429,20 @@ Item {
                    else
                        errorWnd.show("Файл вывода не существует и перед записью будет создан")//. Продолжить?")
 
-                   pause(5000).triggered.connect(function () {successSound.play(); errorWnd.text = "Готово"});
+                   pause(5000).triggered.connect(function () {
+
+                       /// если файл так и не был создан (либо по каким-то еще причинам не отвечает), значит и записан он небыл: что-то пошло не так
+                       if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName)){
+                        //successSound.play();
+                        errorWnd.text = "Готово"
+                       }
+                       else {
+                           //errorSound.play();
+                           errorWnd.text = "Извините, но открыть файл для записи не удалось.
+                                            Пожалуйста, убедитесь, что Ваших прав достаточно для редактирования данного файла в файловой системе.
+                                            Попробуйте открыть и закрыть файл из проводника. После чего повторите попытку."
+                       }
+                   });
 
                }
 
@@ -376,22 +458,6 @@ Item {
                }
            }
 
-
-           FileDialog {
-               id: fileDialog
-
-               title: qsTr("Выбор текстового файла вывода")
-               folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
-               nameFilters: [ "Text files (*.txt *.js *json)", "All files (*)" ]
-               onAccepted: {
-
-                   /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
-                   widgetsEditorManager.outFileName = outFileNameInput.text
-                   fileEdit.text = widgetsEditorManager.outFileContent
-               }
-           }
-
-           Settings { property alias outputFileName: outFileNameInput.text }
        }
 
    function addOrReplace(curItemNum, selectedItems){
@@ -421,10 +487,9 @@ Item {
        var indexesForTextAdded = []
        var indexesForAnalogAdded = []
        for(var i = 0; i < selectedParameters.length; i++){
-
            with(curentParameters[selectedParameters[i]]){
 
-               /// выяснение, в режиме редактирования каких параметров мы находимся - текстовых или аналоговых
+               /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
                var belongsTo, notBelongsTo
                belongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["text_params"] : outFileContent["analog_params"]
                notBelongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["analog_params"] : outFileContent["text_params"]
@@ -445,13 +510,12 @@ Item {
                    belongsTo[indexCur] = []
                    belongsTo[indexCur][0] = name
                    belongsTo[indexCur][1] = signatureCur
-
                    /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
-                   if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
-                       belongsTo[indexCur][2] = upperBoundaryCur
-                       belongsTo[indexCur][3] = lowerBoundaryCur
+                   if(representType === Mode.AttributeRepresentation.ANALOG){
+                       belongsTo[indexCur][2] = upperBoundCur
+                       belongsTo[indexCur][3] = lowerBoundCur
                        if(imageCur != "")
-                       outFileContent["param_icons"][name] = imageCur
+                            outFileContent["param_icons"][name] = imageCur
                    }
 
                    ///если же текстовая, надо удалить картинки из секции картинок
@@ -459,11 +523,12 @@ Item {
                        delete outFileContent["param_icons"][name]
 
                /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой)
-               var keyNotBelong
-               for (keyNotBelong in notBelongsTo){
-                   delete notBelongsTo[indexCur]
-                   console.debug("notBelongsTo Worked")
-               }
+               var anotherSectionParam
+               for (anotherSectionParam in notBelongsTo)
+                   if(anotherSectionParam[0] === name){
+                        delete anotherSectionParam
+                       break;
+                   }
            }
        }
 

@@ -28,7 +28,7 @@ Rectangle {
        anchors.centerIn: parent
         Text {
             id: txt
-            text: qsTr("Выбрано: " + selectedItemsCount + " из " + availableItemsCount)
+            text: qsTr("Выбрано\n" + selectedItemsCount + " из " + availableItemsCount)
             //anchors {right: closeButton.left; verticalCenter: parent.verticalCenter}
             font: appFont
             height: stringHeight
@@ -51,7 +51,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 ToolTip.visible: containsMouse
-                ToolTip.text: "Снять выделения";
+                ToolTip.text: "Снять выделение";
             }
 
         }

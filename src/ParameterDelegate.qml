@@ -1,140 +1,120 @@
-/****************************************************************************
-**
-** Copyright (C) 2017 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
 
 import QtQuick 2.2
 import QtQuick.Controls 2.10
 
-Item {
-    id: delegate
-
-    property int parameterIndex: 0
-    property string description:
-        curentParameters.length > 0 && curentParameters[index].indexCur !== -1 ?
-            qsTr("Параметр" + (curentParameters[index].representType === 0 ? " текстовый" : " аналоговый") +
-            " с индексом " + curentParameters[index].indexCur +
-            " и подписью \"" + curentParameters[index].signatureCur + "\" ") :
-            ""
+Rectangle{
+    property alias description: descriptionText.text
     property url image:
-            curentParameters[index].imageCur !== "" ?
+        curentParameters.length !== 0 && curentParameters[index].imageCur !== "" ?
             Qt.resolvedUrl("../rs/svg/" + curentParameters[index].imageCur + ".svg") :
-            "" // todo
+            ""
+
     width: parent.width
-    height: stringHeight * 2 // todo make width dependent on content
+    height: stringHeight * 2.5 // todo make width dependent on content
+    border.color: borderColor
 
-    scale: selectedParameters.indexOf(index) >= 0 ? 1 : 0.75
-    Behavior on scale { PropertyAnimation { duration: 300 } }
+    Rectangle {
+        id: delegate
 
-    Column {
+        property int parameterIndex: 0
+
+        clip: true
+
         anchors.fill: parent
+        anchors.margins: 1 // чтобы не загораживать рамку
 
-        Row {
-            width: parent.width
-            spacing: smallGap
+        scale: selectedParameters.indexOf(index) >= 0 ? 1 : 0.75
+        color: selectedParameters.indexOf(index) >= 0 ? "ivory" : "white"
+        Behavior on scale { PropertyAnimation { duration: 300 } }
+        Behavior on color { ColorAnimation { duration: 300 } }
 
-            Image {
-                id: descriptionImage
+        Item {
+            anchors.centerIn: parent
+            anchors.fill: parent
+            anchors.margins: smallGap
+            clip: true
 
-                visible: source.toString() !== ""
-                height: visible ? parent.height : 0
-                width: height
-                source: image
-                //todo onVisibleChanged: {print("source:" + source.toString())}
+            Row {
+                id: title
+
+                width: parent.width
+                height: parent.height * 0.4
+                spacing: smallGap
+
+                Image {
+                    visible: status === Image.Ready
+                    height: visible ? parent.height : 0
+                    width: height
+                    source: image
+                    onStatusChanged:
+                        if(status === Image.Error){
+                            errorWnd.show("Внимание, файл " + image + " не был найден. \nПожалуйста, проверьте его наличие по указанному пути и соответствие его формата его расширению")
+                            curentParameters[index].imageCur = ""
+                        }
+                }
+
+                Text {
+                    id: titleText
+
+                    color: selectedParameters.indexOf(index) >= 0 ? "#000000" : "#303030"
+                    text: typeof(curentParameters[index]) !== "undefined" ? "<b>" + curentParameters[index].name + "</b>" : ""
+                    wrapMode: Text.WordWrap
+                    font: appFont
+
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
             }
 
-            Text {
-                id: titleText
+           Text {
+                id: descriptionText
 
-                y: stringHeight * 0.7 // ликвидация пробела, вызванногоо h2
-                color: selectedParameters.indexOf(index) >= 0 ? "#000000" : "#303030"
-                text: typeof(curentParameters[index]) !== "undefined" ? "<h2>" + curentParameters[index].name + "</h2>" : ""
-                wrapMode: Text.WordWrap
+                anchors.top: title.bottom
+                width: parent.width
                 font: appFont
-                Behavior on color { ColorAnimation { duration: 150 } }
+                textFormat: Text.RichText
+                text: curentParameters.length > 0 && curentParameters[index].indexCur !== -1 && selectedParameters.indexOf(index)?
+                        qsTr("<i><small>Параметр" + (curentParameters[index].representType === 0 ? " текстовый" : " аналоговый") +
+                        " с индексом " + curentParameters[index].indexCur +
+                        "\nи подписью \"" + curentParameters[index].signatureCur + "\" </small></i>") :
+                        ""
             }
         }
 
-       Text {
-            id: descriptionText
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
 
-            width: parent.width
-            font: appFont
-            textFormat: Text.RichText
-            text: "<i><small>" + description + "</small></i>"
+                /// 1. Действия в интерфейсе списка по выделению либо сбросу параметра.
+                /// параметр не был выделен - стал, был - выделение сбросилось
+                var isAdded = addOrReplace(index, selectedParameters)
+
+                /// панель атрибутов показываем лишь тогда, когда есть выбранные параметры
+                attributesContainer.height = (selectedParameters.length > 0) ? window.height * 0.3 : 0
+
+                /// если параметр выделен, яркий цвет и размер, сброшен - размер уменьшается и цвет блеклый
+                titleText.color = isAdded >= 0 ? "#000000" : "#303030"
+                delegate.scale = isAdded ? 1 : 0.75
+                delegate.color = isAdded ? "ivory" : "white"
+                descriptionText.text = "<b><i><small>" +qsTr(isAdded ? "Редактируется в данный момент" : "Выделение сброшено")+ "</small></i></b>"
+
+                selectedParametersCount = selectedParameters.length
+
+                /// если произошел выбор параметра кликом (а не сброс), то тому, который был выбран до него (предпоследнему выбранному, получается),
+                /// присваиваются значения атрибутов из табы атрибутов
+                if(isAdded && selectedParametersCount > 1)
+                    writeParamFromGui(selectedParameters[selectedParametersCount - 2])
+
+                /// если произошел сброс параметра
+                else
+                    resetParam(index)
+
+                /// 2. Запись выбранных параметров в область редактирования текстового файла
+                writeParamFromGui(selectedParameters[selectedParametersCount - 1])
+                editingArea.paramsToJson()
+                //doneSound.play()
+
+            }
         }
-    }
 
-    MouseArea {
-        anchors.fill: parent
-        scale: 1.5
-        onClicked: {
-            /// параметр не был выделен - стал, был - выделение сбросилось
-            var isAdded = addOrReplace(index, selectedParameters)
-
-            /// панель атрибутов показываем лишь тогда, когда есть выбранные параметры
-            attributesContainer.visible = (selectedParameters.length > 0)
-
-            /// если параметр выделен, яркий цвет и размер, сброшен - размер уменьшается и цвет блеклый
-            titleText.color = isAdded >= 0 ? "#000000" : "#303030"
-            delegate.scale = isAdded ? 1.0 : 0.75
-            description = qsTr(isAdded ? "<b>Редактируется в данный момент</b>" : "Выделение сброшено")
-
-            selectedParametersCount = selectedParameters.length
-
-            /// если произошел выбор параметра кликом (а не сброс), то тому, который был выбран до него (предпоследнему выбранному, получается),
-            /// присваиваются значения атрибутов из табы атрибутов
-            if(isAdded && selectedParametersCount > 1)
-                writeParamFromGui(selectedParameters[selectedParametersCount - 2])
-
-            /// если произошел сброс параметра
-            else
-                resetParam(index)
-        }
     }
 }

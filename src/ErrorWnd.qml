@@ -18,10 +18,10 @@ MessageDialog {
     function show(msg){
         visible = true
         text = qsTr(msg)
-        if(isQuestion)
-            warnSound.play()
-        else
-            errorSound.play()
+        //if(isQuestion)
+        //    warnSound.play()
+        //else
+        //    errorSound.play()
     }
 
     function choiceDone(){

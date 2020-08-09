@@ -116,8 +116,7 @@ Item {
         rotation: -90
         anchors {
             left: inFileInput.right
-            top:  inFileInput.bottom
-            margins: stringHeight
+            top:  inFileInput.bottom; topMargin: stringHeight
         }
 
         MouseArea {
@@ -149,7 +148,7 @@ Item {
         curentMode = Mode.EditingMode.GRAPHIC_EDITING
         editingArea.categoriesModel = widgetsEditorManager.categories
 
-        doneSound.play()
+        //doneSound.play()
     }
 
     function doesFileExist(fileName) {
