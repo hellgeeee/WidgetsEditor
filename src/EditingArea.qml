@@ -17,13 +17,13 @@ Item {
     property alias attributesTab: attributesTab
     property alias categoriesModel: deviceCategoriesList.model
     property alias parametersList: parametersList
+    property alias outFileName: outFileNameInput.text
 
     visible: curentMode === Mode.EditingMode.TEXT_EDITING || curentMode === Mode.EditingMode.GRAPHIC_EDITING
     anchors.fill: parent
     AttributeFieldText{
         id: deviceCategorySearch
 
-        bBorder: 0
         height: stringHeight
         width: deviceCategoriesList.width
         anchors{
@@ -34,16 +34,21 @@ Item {
         wrapMode: TextEdit.WordWrap
         font.pixelSize: stringHeight * 0.5
         z: 1
+
+        Border{bBorder: 0}
     }
 
 
     Text{
         id: categoriesListEmptyText
         visible: categoriesInfoLine.availableItemsCount === 0
-        text: "Категории не выбраны"
-        anchors.centerIn: deviceCategoriesList
+        text: "Считанный файл не содержит категорий устройств"
+        anchors.fill: deviceCategoriesList
         font: appFont
         color: borderColor
+        wrapMode: Text.WordWrap
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
     }
 
     ListView {
@@ -62,35 +67,35 @@ Item {
 
        delegate: CategoryDelegate {}
 
-       Rectangle{anchors.fill: parent; color: "transparent"; border.color: borderColor}
-    }
+       Footer{
+           id: categoriesInfoLine
+           selectedItemsCount: selectedCategoriesCount
+           availableItemsCount: (typeof(deviceCategoriesList.model) !== "undefined" && deviceCategoriesList.model !== null) ? deviceCategoriesList.model.length : 0
+           width: deviceCategoriesList.width
+           opacity: area.containsMouse || closeBtn.containsMouse? 0.3 : deviceCategoriesScroll.opacity * 0.3
+           closeBtn.onClicked: {
+               selectedCategories = []
+               selectedCategoriesCount = 0
+               selectedParameters = []
+               selectedParametersCount = 0
+               curentParameters = []
 
-    Footer{
-        id: categoriesInfoLine
-        selectedItemsCount: selectedCategoriesCount
-        availableItemsCount: (typeof(deviceCategoriesList.model) !== "undefined" && deviceCategoriesList.model !== null) ? deviceCategoriesList.model.length : 0
-        width: deviceCategoriesList.width
-        opacity: area.containsMouse || closeBtn.containsMouse? 0.3 : deviceCategoriesScroll.opacity * 0.3
-        closeBtn.onClicked: {
-            selectedCategories = []
-            selectedCategoriesCount = 0
-            selectedParameters = []
-            selectedParametersCount = 0
-            curentParameters = []
+               /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво
+               /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
+               deviceCategoriesList.flick(0, deviceCategoriesList.maximumFlickVelocity)
+               pause(500).triggered.connect(function () {
+                   deviceCategoriesList.model = []
+                   deviceCategoriesList.model = widgetsEditorManager.categories
+               })
 
-            /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво            
-            /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
-            deviceCategoriesList.flick(0, deviceCategoriesList.maximumFlickVelocity)
-            pause(500).triggered.connect(function () {
-                deviceCategoriesList.model = []
-                deviceCategoriesList.model = widgetsEditorManager.categories
-            })
+               /// костыль! должно обновиться автоматически
+               parametersList.model = []
+               attributesContainer.opened = false
+               fileEdit.text = ""
+           }
+       }
 
-            /// костыль! должно обновиться автоматически
-            parametersList.model = []
-            attributesContainer.height = 0
-            fileEdit.text = ""
-        }
+       Border{}
     }
 
    ScrollLine {
@@ -120,7 +125,7 @@ Item {
 
            anchors {
                left: deviceCategoriesList.right; leftMargin: stringHeight
-               top: parent.top;
+               top: parent.top
                bottom:attributesContainer.top
            }
            width: stringHeight * 12
@@ -147,7 +152,7 @@ Item {
                    })
 
                    /// костыль!
-                   attributesContainer.height = 0
+                   attributesContainer.opened = false
                    fileEdit.text = ""
                }
            }
@@ -171,28 +176,32 @@ Item {
 
            property bool isEnoughRoomToShow: width - 70 > bar.height
            property int mode: bar.currentIndex
+           property bool opened: false
 
-           Component.onCompleted: height = 0
-
-           Behavior on height {
-               PropertyAnimation {
-                   duration: 500;
-                   easing.type: Easing.InQuart
-               }
-           }
-
-           visible: height > 0
-           height: window.width * 0.3 // достаточно для расположения всевозможных атрибутов
            anchors{
                right: parametersList.right;
                left: parametersList.left
                bottom: deviceCategoriesList.bottom
            }
 
+           states: State {
+               name: "opened"
+               when: attributesContainer.opened
+               PropertyChanges { target: attributesContainer; height: stringHeight * 6.5}
+           }
+
+           transitions: Transition {
+               to: "opened"
+               reversible: true
+               ParallelAnimation {
+                   NumberAnimation {property: "height"; duration: 500; easing.type: Easing.InQuart}
+               }
+           }
+
            TabBar {
               id: bar
 
-              visible: parent.isEnoughRoomToShow
+              visible: parent.isEnoughRoomToShow && attributesContainer.opened
               rotation: 90
               x: (-width + height )/ 2
               y: - x
@@ -204,7 +213,6 @@ Item {
                    id: profilesBtn
 
                    width: attributesContainer.height * 0.5
-                   //height: width * 0.33;
                    text: qsTr("Текстовое")
                }
 
@@ -226,8 +234,7 @@ Item {
                }
            }
 
-           /// рамка
-           Rectangle{color: "transparent"; anchors.fill: parent; border.color: borderColor}
+           Border{}
        }
 
        Flickable {
@@ -281,11 +288,11 @@ Item {
            height: stringHeight
            width: fileEditContainer.width
 
+           Border{}
 
            AttributeFieldText{
                id: outFileNameInput
 
-               rBorder: 0
                placeholderText: qsTr("Выходной файл ")
                 anchors{
                     right: outFileCoiceBtn.left
@@ -293,6 +300,8 @@ Item {
                     top: parent.top
                     bottom: parent.bottom
                 }
+
+                ToolTip.text: "Файл доступен в директории \"./qml/SensorView/templates\" \n относительно корневой директории проекта Integra Planet Earth";
 
                FileDialog {
                    id: fileDialog
@@ -310,10 +319,8 @@ Item {
                    }
                }
 
-               Settings { property alias outputFileName: outFileNameInput.text }
+               Settings { property alias outFileName: outFileNameInput.text }
            }
-
-
 
            Image {
                id: outFileCoiceBtn
@@ -340,6 +347,7 @@ Item {
            /// кнопка принятия файла вывода
            Image {
                id: outFileAcceptBtn
+
                anchors{
                    top: parent.top; bottom: parent.bottom
                    right: outFileRecordBtn.left
@@ -393,56 +401,27 @@ Item {
                        fileEdit.text ===
                        '"text_params": {},
                        "analog_params": {},
-                       "param_icons": {}'){
+                       "param_icons": {}')
+                   {
                        errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла"))
                        return
                    }
 
-                   //if(curentMode === Mode.EditingMode.GRAPHIC_EDITING) {
-                   //
-                   //        widgetsEditorManager.outFileContent = JSON.stringify(outFileContent, [], '\t')
-                   //
-                       /// создание строчки для записи в файл виджетов
-                       var selectedCategoriesJsn = JSON.parse('{}')
-                       selectedCategoriesJsn[outFileNameInput.text] = [];
-                       for (var i = 0; i < selectedCategoriesCount; i++)
-                           selectedCategoriesJsn[outFileNameInput.text].push(widgetsEditorManager.categories[selectedCategories[i]].name)
-                       var selectedCategoriesStr = JSON.stringify(selectedCategoriesJsn)
-                       //selectedCategoriesStr = selectedCategoriesStr.substring(1, selectedCategoriesStr.length-1)
-                       widgetsEditorManager.selectedCategories = selectedCategoriesStr
-                   //}
-                   //{
-                       try {
-                           outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", fileEdit.text))
-                           widgetsEditorManager.outFileContent = fileEdit.text
-                       } catch(e) {
-                           errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте правильность выражений либо отредактируйте в графическом режиме"))
-                           return
-                       }
-                   //}
-
-                   errorWnd.isQuestion = true
-                   if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName)){
-                       // todo не знаю, как остановить работу программы до момента ответа пользователя
-                       errorWnd.show("Файл вывода уже существует и будет перезаписан")//. Продолжить?")
-                   }
+                   if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName))
+                       fileRecordQuestionWnd.show("Файл вывода уже существует и будет перезаписан. Продолжить?")
                    else
-                       errorWnd.show("Файл вывода не существует и перед записью будет создан")//. Продолжить?")
+                       fileRecordQuestionWnd.show("Файл вывода не существует, перед записью он будет создан. Продолжить?")
 
-                   pause(5000).triggered.connect(function () {
-
-                       /// если файл так и не был создан (либо по каким-то еще причинам не отвечает), значит и записан он небыл: что-то пошло не так
-                       if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName)){
-                        //successSound.play();
-                        errorWnd.text = "Готово"
-                       }
-                       else {
-                           //errorSound.play();
-                           errorWnd.text = "Извините, но открыть файл для записи не удалось.
-                                            Пожалуйста, убедитесь, что Ваших прав достаточно для редактирования данного файла в файловой системе.
-                                            Попробуйте открыть и закрыть файл из проводника. После чего повторите попытку."
-                       }
-                   });
+                   //pause(5000).triggered.connect(function () {
+                   //
+                   //    /// если файл так и не был создан (либо по каким-то еще причинам не отвечает), значит и записан он небыл: что-то пошло не так
+                   //    if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName))
+                   //     errorWnd.text = "Готово"
+                   //    else
+                   //        errorWnd.text = "Извините, но открыть файл для записи не удалось.
+                   //                         Пожалуйста, убедитесь, что Ваших прав достаточно для редактирования данного файла в файловой системе.
+                   //                         Попробуйте открыть и закрыть файл из проводника. После чего повторите попытку."
+                   //});
 
                }
 
@@ -474,7 +453,7 @@ Item {
        }
    }
 
-   function paramsToJson(){
+   function paramsToJson(isIncludingLast){
 
        /// инициализация выходного объекта, делается один раз за одну выборку категорий
        with(JSON){
@@ -486,24 +465,34 @@ Item {
        /// мы запоминаем все индексы элементов, что добавлены для каждой секции во избежание добавления элементов с одинаковыми индексами
        var indexesForTextAdded = []
        var indexesForAnalogAdded = []
-       for(var i = 0; i < selectedParameters.length; i++){
+       //последний выбранный параметр в файл не пишем
+       for(var i = 0; i < selectedParameters.length - (isIncludingLast ? 0 : 1); i++){
            with(curentParameters[selectedParameters[i]]){
 
                /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
                var belongsTo, notBelongsTo
-               belongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["text_params"] : outFileContent["analog_params"]
-               notBelongsTo = representType === Mode.AttributeRepresentation.TEXT ? outFileContent["analog_params"] : outFileContent["text_params"]
+               var isTextRepresent
+               isTextRepresent = curentParameters[selectedParameters[i]].representType === Mode.AttributeRepresentation.TEXT
+               belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
+               notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
 
-               /// если параметр с таким именем встречается в файле он будет переписан, нет - он будет дописан         //
-                if(representType === Mode.AttributeRepresentation.TEXT){
-                    while(indexesForTextAdded.indexOf(indexCur) >= 0)
-                        indexCur++
+               /// если такой индекс встречается в рамках данной секции (аналоговой или текстовой), то вместо него присваивается другой - наименьший из тех, что не встречаются
+                if(isTextRepresent){
+                   print("indexesForTextAdded: " + indexesForTextAdded + " indexCur: " + indexCur)
+                   if(indexesForTextAdded.indexOf(indexCur) >= 0){
+                    indexCur = 1
+                        while(indexesForTextAdded.indexOf(indexCur) >= 0)
+                            indexCur++
+                   }
                     indexesForTextAdded.push(indexCur)
                 }
-                else if(representType === Mode.AttributeRepresentation.ANALOG){
-                    while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
-                        indexCur++
-                indexesForAnalogAdded.push(indexCur)
+                else {
+                   if(indexesForAnalogAdded.indexOf(indexCur) >= 0){
+                       indexCur = 1
+                        while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
+                            indexCur++
+                   }
+                    indexesForAnalogAdded.push(indexCur)
                 }
 
                    /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
@@ -511,7 +500,7 @@ Item {
                    belongsTo[indexCur][0] = name
                    belongsTo[indexCur][1] = signatureCur
                    /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
-                   if(representType === Mode.AttributeRepresentation.ANALOG){
+                   if(!isTextRepresent){
                        belongsTo[indexCur][2] = upperBoundCur
                        belongsTo[indexCur][3] = lowerBoundCur
                        if(imageCur != "")
@@ -533,6 +522,25 @@ Item {
        }
 
        fileEdit.text = JSON.stringify(outFileContent, [], ' ')
+   }
+
+   function recordFile(){
+
+       /// создание строчки для записи в файл виджетов
+       var selectedCategoriesJsn = JSON.parse('{}')
+       selectedCategoriesJsn[outFileNameInput.text] = [];
+       for (var i = 0; i < selectedCategoriesCount; i++)
+           selectedCategoriesJsn[outFileNameInput.text].push(widgetsEditorManager.categories[selectedCategories[i]].name)
+       var selectedCategoriesStr = JSON.stringify(selectedCategoriesJsn)
+       //selectedCategoriesStr = selectedCategoriesStr.substring(1, selectedCategoriesStr.length-1)
+       widgetsEditorManager.selectedCategories = selectedCategoriesStr
+
+       try {
+           outFileContent = JSON.parse(' double quotes sentence '.replace("double quotes sentence", fileEdit.text))
+           widgetsEditorManager.outFileContent = fileEdit.text
+       } catch(e) {
+           errorWnd.show(qsTr("Ошибка синтаксиса в текстовом файле вывода. Проверьте пожалуйста правильность выражений либо отредактируйте в графическом режиме"))
+       }
    }
 }
 

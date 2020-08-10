@@ -27,7 +27,6 @@ Item {
         width: window.width * 0.8
         placeholderText: qsTr("Введите путь и название либо выбирете из файловой системы")
 
-
         Image {
             anchors{
                 top: parent.top; bottom: parent.bottom
@@ -45,8 +44,9 @@ Item {
                 ToolTip.visible: containsMouse
                 ToolTip.text: ipeFolderInput.text === "" ? qsTr("Выбрать входной файл") : ipeFolderInput.text
             }
-
         }
+
+        Border{}
     }
 
     Text{
@@ -84,18 +84,16 @@ Item {
                 ToolTip.visible: containsMouse
                 ToolTip.text: inFileInput.text === "" ? qsTr("Выбрать файл существующих виджетов ") : inFileInput.text
             }
-
         }
 
+        Border{}
     }
 
     FolderDialog {
         id: folderDialog
         title: qsTr("Выбор папки приложения Integra Planet Earth")
         folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
-        onAccepted:{
-            ipeFolderInput.text = trimUrl(folder)
-        }
+        onAccepted: ipeFolderInput.text = trimUrl(folder)
     }
 
     FileDialog {
@@ -103,8 +101,7 @@ Item {
         title: qsTr("Выбор текстового файла")
         folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
         nameFilters: [ "Text files (*.txt *.js *json)", "All files (*)" ]
-        onAccepted:
-            inFileInput.text = trimUrl(file)
+        onAccepted: inFileInput.text = trimUrl(file)
     }
 
     Image {
@@ -129,9 +126,13 @@ Item {
     }
 
     Settings {
+        id: settings
         property alias inFileName: ipeFolderInput.text
+        property string outFilename: editingArea.outFileName
         property alias widgetsExistFileName: inFileInput.text
     }
+
+    Component.onCompleted: {print("settings.outFilename " + settings.outFilename + "window.width " + settings.inFileName)}
 
     function save(){
         /// проверка существования всех файлов ввода-вывода

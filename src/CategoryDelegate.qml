@@ -4,18 +4,29 @@ import QtGraphicalEffects 1.0 // for ColorOverlay
 Rectangle {
     id: delegate
 
-    property color delegateColor: selectedCategories.indexOf(index) >= 0 ? "#000000" : "#303030"
-
-    Behavior on scale { PropertyAnimation { duration: 300 } }
-    Behavior on delegateColor { ColorAnimation { duration: 150 } }
-    Behavior on color { ColorAnimation { duration: 300 } }
+    property bool selected: selectedCategories.indexOf(index) >= 0
+    property color delegateColor: selected ? "#000000" : "#303030"
 
     visible: widgetsEditorManager.categories[index].name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
-    scale: selectedCategories.indexOf(index) >= 0 ? 1.0 : 0.75
+    scale: 0.75
     width: visible ? parent.width: 0
     height: width
     anchors.horizontalCenter: parent.horizontalCenter
-    color: selectedCategories.indexOf(index) >= 0 ? "ivory" : "white"
+
+    states: State {
+        name: "brighter"
+        when: selected
+        PropertyChanges { target: delegate; color: "ivory"; scale: 1; delegateColor: "#000000" }
+    }
+
+    transitions: Transition {
+        to: "brighter"
+        reversible: true
+        ParallelAnimation {
+            NumberAnimation {property: "scale"; duration: 500; easing.type: Easing.InQuart}
+            ColorAnimation { duration: 500 }
+        }
+    }
 
     Image {
         id: categoryIcon
@@ -52,12 +63,10 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
+        scale: 1/parent.scale
         onClicked: {
-            var isAdded = addOrReplace(index, selectedCategories)
-            /// костыль: не обновляется автоматически
-            delegateColor = isAdded ? "#000000" : "#303030"
-            delegate.scale = isAdded ? 1.0 : 0.75
-            delegate.color = isAdded ? "ivory" : "white"
+            selected = addOrReplace(index, selectedCategories)
+
             selectedCategoriesCount = selectedCategories.length
 
             curentParameters = findAvailableParamsIntersection()
@@ -67,7 +76,7 @@ Rectangle {
             // костыль, почему-то не обновляется автоматически
             parametersList.model = []
             parametersList.model = curentParameters
-            attributesContainer.height = 0
+            attributesContainer.opened = false
             fileEdit.text = ""
         }
     }

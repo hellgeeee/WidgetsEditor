@@ -1,21 +1,29 @@
 import QtQuick 2.10
 
 Column{
+    id: menu
 
-    visible: height > 0
+    property bool opened: false
+
     anchors{
         top: settingsButton.bottom
         right: parent.right; rightMargin: smallGap
     }
     width: Math.min(220, window.width * 0.25)
-    height: 0
     clip: true
     z: 1
 
-    Behavior on height {
-        PropertyAnimation {
-            duration: 500;
-            easing.type: Easing.InQuart
+    states: State {
+        name: "opened"
+        when: opened
+        PropertyChanges { target: menu; height: stringHeight * 5}
+    }
+
+    transitions: Transition {
+        to: "opened"
+        reversible: true
+        ParallelAnimation {
+            NumberAnimation {property: "height"; duration: 500; easing.type: Easing.InQuart}
         }
     }
 

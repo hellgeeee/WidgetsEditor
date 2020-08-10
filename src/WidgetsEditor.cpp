@@ -52,14 +52,17 @@ QList<QObject*> WidgetsEditorManager::parse()
 
     /// 2. Считать категории устройств, доступных для участия в создании виджетов
     file.setFileName(_inFileName);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    qDebug() << _inFileName;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug()<< "file " + _inFileName + " wasn't open! Sos! Do something with this pls.";
         return QList<QObject*>();
+    }
     QJsonObject jsn = QJsonDocument::fromJson(QString(file.readAll()).toUtf8()).object();
     file.close();
 
     QList<QObject*> deviceCategories;
     auto categoriesJsn = jsn["types"].toObject();
-    for(auto category : categoriesJsn.keys() ){
+    for(QString category : categoriesJsn.keys() ){
 
         /// не берем данную категорию устройств, если для нее хоть что-то из перечисленного выполнилось:
         /// - нет параметров
@@ -109,8 +112,10 @@ void WidgetsEditorManager::setOutFileName(const QString& val){
     _outFileName = IPEFolder.path() + "/" + val + ".qml";
 
     QFile file(_outFileName);
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)){
-        qDebug()<< "file wasn't open! Sos! Do something with this pls.";
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        /// значит, не существует
+        qDebug() << "file you try to open does not exist";
+        //qDebug()<< "file wasn't open! Sos! Do something with this pls.";
         return;
     }
     QTextStream in(&file);
@@ -140,7 +145,7 @@ void WidgetsEditorManager::setOutFileContent(const QString& contentJsonFormated)
        return;
    }
    QTextStream out(&file);
-   out << "import QtQuick 2.0 \n import \"../../Components\"\n\nComplexWidget" << contentJsFormated;
+   out << "import QtQuick 2.0\nimport \"../../Components\"\n\nComplexWidget" << contentJsFormated;
    file.close();
 }
 

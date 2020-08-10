@@ -51,6 +51,12 @@ Item {
 
     ErrorWnd{id: errorWnd}
 
+    ErrorWnd{
+        id: fileRecordQuestionWnd
+        isQuestion: true
+        onYes: editingArea.recordFile()
+    }
+
     MediaPlayer{
         id: errorSound
         source: "qrc:/../rs/mp3/error_but_funny2.mp3"
@@ -89,7 +95,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: menu.height === 0 ? menu.height = window.height  * 0.3 : menu.height = 0//menu.visible = !menu.visible
+            onClicked: menu.opened = !menu.opened
             ToolTip.visible: containsMouse
             ToolTip.text: "Опции"
         }
@@ -113,7 +119,6 @@ Item {
             onClicked:
                 if(curentMode === Mode.EditingMode.ABOUT
                     || curentMode === Mode.EditingMode.TUTORIAL
-                    || curentMode === Mode.EditingMode.SETTINGS
                     || curentMode === Mode.EditingMode.IN_OUT_SETTINGS)
                        curentMode = Mode.EditingMode.GRAPHIC_EDITING
                     else{
@@ -171,28 +176,26 @@ Item {
         curentParameters[paramNum].lowerBoundCur = false
         curentParameters[paramNum].imageCur = ""
         curentParameters[paramNum].representType = -1
-        editingArea.parametersList.itemAtIndex(paramNum).image = ""
-        editingArea.parametersList.itemAtIndex(paramNum).description = ""
+        editingArea.parametersList.itemAtIndex(paramNum).setImage("")
+        editingArea.parametersList.itemAtIndex(paramNum).descr = "<b><i><small>Выделение сброшено</small></i></b>"
     }
 
     function writeParamFromGui(paramNum){
         curentParameters[paramNum].indexCur = editingArea.attributesTab.indexCur
         curentParameters[paramNum].signatureCur = editingArea.attributesTab.signatureCur
         curentParameters[paramNum].representType = editingArea.attributesModeCur
-        editingArea.parametersList.itemAtIndex(paramNum).description =
+        editingArea.parametersList.itemAtIndex(paramNum).descr =
             curentParameters[paramNum].indexCur !== -1 ?
-                qsTr("<i><small>Параметр " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
-                " с индексом " + editingArea.attributesTab.indexCur  +
-                     "\nи подписью \"" + editingArea.attributesTab.signatureCur + "\" </i></small>") :
+                qsTr("<i><small>Вы присвоили тип " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
+                ", индекс " + editingArea.attributesTab.indexCur  +
+                " и подпись \"" + editingArea.attributesTab.signatureCur + "\" </i></small>") :
                 ""
         if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
             curentParameters[paramNum].upperBoundCur = editingArea.attributesTab.upperBoundCur
             curentParameters[paramNum].lowerBoundCur = editingArea.attributesTab.lowerBoundCur
             curentParameters[paramNum].imageCur = editingArea.attributesTab.imageCur
-            editingArea.parametersList.itemAtIndex(paramNum).image =
-                    curentParameters[paramNum].imageCur !== "" ?
-                        Qt.resolvedUrl("../rs/svg/" + curentParameters[paramNum].imageCur + ".svg") :
-                        ""
+
+            editingArea.parametersList.itemAtIndex(paramNum).setImage(curentParameters[paramNum].imageCur)
         }
     }
 

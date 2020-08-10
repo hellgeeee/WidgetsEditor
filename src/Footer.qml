@@ -10,8 +10,13 @@ Rectangle {
     property alias area: area
 
     width: parent.width
-    anchors.bottom: parent.bottom
-    height: stringHeight
+    anchors{
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+    }
+
+    height: stringHeight + 2
     color: "black"
 
     /// для сокрытия при сжатии окна
@@ -23,37 +28,37 @@ Rectangle {
         anchors.fill: parent;
         hoverEnabled: true
     }
+    Text {
+        id: txt
+        text: qsTr("Выбрано " + selectedItemsCount + " из " + availableItemsCount)
+        font: appFont
+        height: stringHeight
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+        anchors.rightMargin: stringHeight
+        wrapMode: Text.WordWrap
+    }
 
-    Row{
-       anchors.centerIn: parent
-        Text {
-            id: txt
-            text: qsTr("Выбрано\n" + selectedItemsCount + " из " + availableItemsCount)
-            //anchors {right: closeButton.left; verticalCenter: parent.verticalCenter}
-            font: appFont
-            height: stringHeight
-            verticalAlignment: Text.AlignVCenter
+    Image {
+        id: closeButton
+
+        source: "qrc:/../rs/svg/close-button.svg"
+        width: height
+        anchors{
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+            margins: smallGap
         }
 
-        Item{ width: smallGap; height: 1 }
+        MouseArea {
+            id: closeBtn
 
-        Image {
-            id: closeButton
-
-            source: "qrc:/../rs/svg/close-button.svg"
-            height: stringHeight - smallGap
-            width: height
-            anchors.verticalCenter: parent.verticalCenter
-
-            MouseArea {
-                id: closeBtn
-
-                anchors.fill: parent
-                hoverEnabled: true
-                ToolTip.visible: containsMouse
-                ToolTip.text: "Снять выделение";
-            }
-
+            anchors.fill: parent
+            hoverEnabled: true
+            ToolTip.visible: containsMouse
+            ToolTip.text: "Снять выделение";
         }
     }
 }

@@ -23,7 +23,7 @@ Rectangle{
             margins: smallGap * 0.5
         }
         scale: selected ? 1 : 0.75
-        Behavior on scale { PropertyAnimation { duration: 300 } }
+        Behavior on scale { NumberAnimation { duration: 300 } }
         Behavior on curColor { ColorAnimation { duration: 300 } }
 
         Image {
@@ -63,7 +63,7 @@ Rectangle{
         hoverEnabled: true
         onClicked: {
             curentMode = mode
-            menu.height = 0
+            menu.opened = false
         }
 }
 }

@@ -10,10 +10,10 @@ MessageDialog {
     visible: false
     icon: StandardIcon.Warning
 
-    standardButtons: /*isQuestion ? (StandardButton.Yes | StandardButton.No) : */StandardButton.Ok
+    standardButtons: isQuestion ? (StandardButton.Yes | StandardButton.No) : StandardButton.Ok
 
-    onYes: choiceDone()
-    onNo: choiceDone()
+    //onYes: choiceDone()
+    //onNo: choiceDone()
 
     function show(msg){
         visible = true
@@ -24,7 +24,7 @@ MessageDialog {
         //    errorSound.play()
     }
 
-    function choiceDone(){
-        isQuestion = false
-    }
+    //function choiceDone(){
+    //    isQuestion = false
+    //}
 }
