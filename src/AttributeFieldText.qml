@@ -13,6 +13,7 @@ TextArea{
     leftPadding: shift < 0 ? shift : smallGap
     hoverEnabled: true
 
-    ToolTip.visible: hovered && shift < 0
-    ToolTip.text: attributeField.text;
+    ToolTip.visible: hovered
+    ToolTip.text: text
+    ToolTip.delay: 300
 }

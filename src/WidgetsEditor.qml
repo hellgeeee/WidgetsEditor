@@ -25,6 +25,7 @@ Item {
     property font appFont: editingArea.appFont
     property color textColor: "#303030"
     property color borderColor: "lightgray"
+    property int elementsRadius: 10
 
 
     property var outFileContent: JSON.parse('{}')
@@ -98,6 +99,7 @@ Item {
             onClicked: menu.opened = !menu.opened
             ToolTip.visible: containsMouse
             ToolTip.text: "Опции"
+            ToolTip.delay: 300
         }
     }
 
@@ -129,6 +131,7 @@ Item {
 
             ToolTip.visible: containsMouse
             ToolTip.text: "Закрыть"
+            ToolTip.delay: 300
         }
     }
 
@@ -178,25 +181,9 @@ Item {
         curentParameters[paramNum].representType = -1
         editingArea.parametersList.itemAtIndex(paramNum).setImage("")
         editingArea.parametersList.itemAtIndex(paramNum).descr = "<b><i><small>Выделение сброшено</small></i></b>"
-    }
 
-    function writeParamFromGui(paramNum){
-        curentParameters[paramNum].indexCur = editingArea.attributesTab.indexCur
-        curentParameters[paramNum].signatureCur = editingArea.attributesTab.signatureCur
-        curentParameters[paramNum].representType = editingArea.attributesModeCur
-        editingArea.parametersList.itemAtIndex(paramNum).descr =
-            curentParameters[paramNum].indexCur !== -1 ?
-                qsTr("<i><small>Вы присвоили тип " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
-                ", индекс " + editingArea.attributesTab.indexCur  +
-                " и подпись \"" + editingArea.attributesTab.signatureCur + "\" </i></small>") :
-                ""
-        if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
-            curentParameters[paramNum].upperBoundCur = editingArea.attributesTab.upperBoundCur
-            curentParameters[paramNum].lowerBoundCur = editingArea.attributesTab.lowerBoundCur
-            curentParameters[paramNum].imageCur = editingArea.attributesTab.imageCur
-
-            editingArea.parametersList.itemAtIndex(paramNum).setImage(curentParameters[paramNum].imageCur)
-        }
+        /// Запись выбранных параметров в область редактирования текстового файла (false значит не включая последний)
+        editingArea.paramsToJson()
     }
 
     function trimUrl(str){

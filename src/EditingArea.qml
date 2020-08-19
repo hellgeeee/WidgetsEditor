@@ -33,7 +33,8 @@ Item {
         placeholderText: qsTr("Поиск")
         wrapMode: TextEdit.WordWrap
         font.pixelSize: stringHeight * 0.5
-        z: 1
+        ToolTip.visible: hovered && shift < 0
+        ToolTip.delay: 300
 
         Border{bBorder: 0}
     }
@@ -84,12 +85,12 @@ Item {
                /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
                deviceCategoriesList.flick(0, deviceCategoriesList.maximumFlickVelocity)
                pause(500).triggered.connect(function () {
-                   deviceCategoriesList.model = []
                    deviceCategoriesList.model = widgetsEditorManager.categories
+                   parametersList.model = []
                })
 
                /// костыль! должно обновиться автоматически
-               parametersList.model = []
+               deviceCategoriesList.model = []
                attributesContainer.opened = false
                fileEdit.text = ""
            }
@@ -101,19 +102,18 @@ Item {
    ScrollLine {
        id: deviceCategoriesScroll
 
-       height: scrollArea.height;
-       width: smallGap
-       scrollArea: deviceCategoriesList;
+       height: scrollArea.height
+       scrollArea: deviceCategoriesList
        anchors {
-           right: deviceCategoriesList.right;
-           top: deviceCategorySearch.bottom;
+           right: deviceCategoriesList.right
+           top: deviceCategorySearch.bottom
            bottom: parent.bottom
        }
    }
 
    Text{
        id: parametersListEmptyText
-       visible: pareamsInfoLine.availableItemsCount === 0
+       visible: paramsInfoLine.availableItemsCount === 0
        text: "Категории не выбраны"
        anchors.centerIn: parametersList
        font: appFont
@@ -124,17 +124,15 @@ Item {
            id: parametersList
 
            anchors {
-               left: deviceCategoriesList.right; leftMargin: stringHeight
-               top: parent.top
-               bottom:attributesContainer.top
+               left: deviceCategoriesList.right; leftMargin: smallGap
            }
+           height: window.height - attributesContainer.height
            width: stringHeight * 12
            model: curentParameters
            delegate: ParameterDelegate {}
 
-
            Footer{
-               id: pareamsInfoLine
+               id: paramsInfoLine
                selectedItemsCount: selectedParametersCount
                availableItemsCount: curentParameters.length
                opacity: area.containsMouse || closeBtn.containsMouse ? 0.3 : parametersScroll.opacity * 0.3
@@ -150,13 +148,13 @@ Item {
                        parametersList.model = [];
                        parametersList.model = curentParameters
                    })
+                   attributesTab.clear()
 
                    /// костыль!
                    attributesContainer.opened = false
                    fileEdit.text = ""
                }
            }
-
        }
 
        ScrollLine {
@@ -178,6 +176,14 @@ Item {
            property int mode: bar.currentIndex
            property bool opened: false
 
+           onModeChanged:  {
+               attributesTab.indexSpinValue = curentParameters[selectedParameters[selectedParametersCount - 1]].indexCur
+               /// найди наименьший подходящий индекс (true - значит переприсвоить, если текущий повторяет имеющиеся), потом запиши последний параметр
+               attributesTab.findIndexFstAvailable(true)
+               attributesTab.writeParam(selectedParameters[selectedParametersCount - 1])
+               attributesTab.findIndexFstAvailable(false) // false - значит индекс влияет только на спинбокс, но не наданные
+           }
+
            anchors{
                right: parametersList.right;
                left: parametersList.left
@@ -187,9 +193,8 @@ Item {
            states: State {
                name: "opened"
                when: attributesContainer.opened
-               PropertyChanges { target: attributesContainer; height: stringHeight * 6.5}
+               PropertyChanges { target: attributesContainer; height: stringHeight * 6}
            }
-
            transitions: Transition {
                to: "opened"
                reversible: true
@@ -198,28 +203,29 @@ Item {
                }
            }
 
+           border.color: borderColor
+           radius: elementsRadius
+
            TabBar {
               id: bar
 
               visible: parent.isEnoughRoomToShow && attributesContainer.opened
               rotation: 90
-              x: (-width + height )/ 2
-              y: - x
-              height: profilesBtn.height
+              x: (-width + height )/ 2 + 1 // +1 и +2 здесь для того, чтобы кнопки не загораживали рамку
+              y: - x + 2
+              height: textRepresentationModeBtn.height
               currentIndex: 0
               font: appFont
 
                TabButton {
-                   id: profilesBtn
+                   id: textRepresentationModeBtn
 
                    width: attributesContainer.height * 0.5
                    text: qsTr("Текстовое")
                }
 
                TabButton {
-                   id: filtersBtn
-
-                   width: profilesBtn.width
+                   width: textRepresentationModeBtn.width
                    text: qsTr("Аналоговое")
                }
 
@@ -233,44 +239,48 @@ Item {
                    topMargin: smallGap
                }
            }
-
-           Border{}
        }
 
-       Flickable {
+       Rectangle{
            id: fileEditContainer
 
+           color: "lightgrey"
            anchors{
                 right: parent.right
-                left: parametersList.right; leftMargin: stringHeight
+                left: parametersList.right; leftMargin: smallGap
                 top: deviceCategoriesList.top
                 bottom: parent.bottom; bottomMargin: stringHeight
            }
-           contentWidth: width;
-           contentHeight: fileEdit.height
-           clip: true
 
-           TextArea{
-               id: fileEdit
+           Flickable {
+               id: fileEditMovableContainer
+               anchors.fill: parent
+               contentWidth: width;
+               contentHeight: fileEdit.height
+               clip: true
 
-               /// предполагаем, что ширина буквы примерно 0.7 от ее высоты
-               property double textHeight: ( text.length * (font.pixelSize * 0.7) / width // сколько строчек
-                                           + text.split("\n").length - 1) // с учетом переносов на новую строку ( при этом получится с большим запасом)
-                                           * font.pixelSize * 1.2 // высота строчки
+               //Rectangle{color: "#000000"; anchors.fill: parent}
+               TextArea{
+                   id: fileEdit
 
-               width: parent.width;
-               height: textHeight > window.height ? textHeight : window.height - stringHeight
-               wrapMode: TextEdit.WrapAnywhere
-               placeholderText: qsTr("Пока что пусто")
-               font: appFont
-
-               /// фон
-               Rectangle{color: "#80804000"; anchors.fill: parent}
-           }
-       }
+                   /// предполагаем, что ширина буквы примерно 0.7 от ее высоты
+                   property double textHeight: ( text.length * (font.pixelSize * 0.7) / width // сколько строчек
+                                               + text.split("\n").length - 1) // с учетом переносов на новую строку ( при этом получится с большим запасом)
+                                               * font.pixelSize * 1.2 // высота строчки
+                   anchors{ top: parent.top; topMargin: -height * 0.1}
+                   scale: 0.8
+                   width: parent.width;
+                   height: textHeight > window.height ? textHeight : window.height - stringHeight
+                   wrapMode: TextEdit.WrapAnywhere
+                   placeholderText: qsTr("Пока что пусто")
+                   font: appFont
+                   color: "red"
+               }
+            }
+        }
 
        ScrollLine {
-           scrollArea: fileEditContainer
+           scrollArea: fileEditMovableContainer
            width: smallGap
            anchors {
                right: fileEditContainer.right;
@@ -293,21 +303,20 @@ Item {
            AttributeFieldText{
                id: outFileNameInput
 
-               placeholderText: qsTr("Выходной файл ")
+               placeholderText: qsTr("Выходной файл")
                 anchors{
                     right: outFileCoiceBtn.left
                     left: parent.left
                     top: parent.top
                     bottom: parent.bottom
                 }
-
-                ToolTip.text: "Файл доступен в директории \"./qml/SensorView/templates\" \n относительно корневой директории проекта Integra Planet Earth";
+                ToolTip.text: "Введите имя файла без расширения. Файл будет доступен в директории \"./qml/SensorView/templates\" относительно корневой директории проекта Integra Planet Earth"
+                ToolTip.delay: 300
 
                FileDialog {
                    id: fileDialog
 
                    title: qsTr("Выбор текстового файла вывода")
-                   folder: typeof(widgetsEditorManager) !== "undefined" ? "file:///" + widgetsEditorManager.curDir : ""
                    nameFilters: [ "Text files (*.qml)", "All files (*)" ]
                    onAccepted: {
                        var fileNameNoExt = file.toString()
@@ -319,7 +328,7 @@ Item {
                    }
                }
 
-               Settings { property alias outFileName: outFileNameInput.text }
+               //Settings { property alias outFileName: outFileNameInput.text }
            }
 
            Image {
@@ -340,7 +349,8 @@ Item {
                    hoverEnabled: true
                    onClicked: fileDialog.open()
                    ToolTip.visible: containsMouse
-                   ToolTip.text: outFileNameInput.text === "" ? qsTr("Выбрать выходной файл") : outFileNameInput.placeholderText + outFileNameInput.text;
+                   ToolTip.text: outFileNameInput.text === "" ? qsTr("Выбрать выходной файл") : outFileNameInput.placeholderText + outFileNameInput.text
+                   ToolTip.delay: 300
                }
            }
 
@@ -368,12 +378,14 @@ Item {
                    }
                    ToolTip.visible: containsMouse
                    ToolTip.text: qsTr("Прочитать выходной файл")
+                   ToolTip.delay: 300
                }
            }
 
            /// кнопка записи файла вывода
            DelayButton{
                id: outFileRecordBtn
+
                enabled: checked === false
                height: stringHeight
                width: height
@@ -385,8 +397,13 @@ Item {
                delay: 1000
 
                ToolTip.visible: hovered
-               ToolTip.text: "Удерживайте, чтобы записать выходной файл";
-
+               ToolTip.text: "Удерживайте, чтобы записать выходной файл"
+               ToolTip.delay: 300
+               onProgressChanged: if(progress > 0.015 && progress < 0.017){
+                                      var matchStr = outFileNameInput.text.match(/^[\w\- ]+/)
+                                      if(!matchStr || matchStr.toString() !== outFileNameInput.text.toString())
+                                          errorWnd.show(qsTr("Внимание, сохранение в файл не было произведено, потому что имя выходного файла недопустимо"))
+                                 }
                onActivated: {
 
                    /// хотим, чтобы после клика кнопка немного помигала. Показывая, что в файл произошла запись
@@ -453,7 +470,7 @@ Item {
        }
    }
 
-   function paramsToJson(isIncludingLast){
+   function paramsToJson(){
 
        /// инициализация выходного объекта, делается один раз за одну выборку категорий
        with(JSON){
@@ -462,38 +479,15 @@ Item {
                outFileContent["param_icons"] = parse('{}')
        }
 
-       /// мы запоминаем все индексы элементов, что добавлены для каждой секции во избежание добавления элементов с одинаковыми индексами
-       var indexesForTextAdded = []
-       var indexesForAnalogAdded = []
-       //последний выбранный параметр в файл не пишем
-       for(var i = 0; i < selectedParameters.length - (isIncludingLast ? 0 : 1); i++){
-           with(curentParameters[selectedParameters[i]]){
+       for(var i = 0; i < selectedParameters.length; i++){
+           /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
+           var belongsTo, notBelongsTo
+           var isTextRepresent
+           with(curentParameters[selectedParameters[i]]){ // name вместо curentParameters[selectedParameters[i]].name и т.д.
+           isTextRepresent = representType === Mode.AttributeRepresentation.TEXT
+           belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
+           notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
 
-               /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
-               var belongsTo, notBelongsTo
-               var isTextRepresent
-               isTextRepresent = curentParameters[selectedParameters[i]].representType === Mode.AttributeRepresentation.TEXT
-               belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
-               notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
-
-               /// если такой индекс встречается в рамках данной секции (аналоговой или текстовой), то вместо него присваивается другой - наименьший из тех, что не встречаются
-                if(isTextRepresent){
-                   print("indexesForTextAdded: " + indexesForTextAdded + " indexCur: " + indexCur)
-                   if(indexesForTextAdded.indexOf(indexCur) >= 0){
-                    indexCur = 1
-                        while(indexesForTextAdded.indexOf(indexCur) >= 0)
-                            indexCur++
-                   }
-                    indexesForTextAdded.push(indexCur)
-                }
-                else {
-                   if(indexesForAnalogAdded.indexOf(indexCur) >= 0){
-                       indexCur = 1
-                        while(indexesForAnalogAdded.indexOf(indexCur) >= 0)
-                            indexCur++
-                   }
-                    indexesForAnalogAdded.push(indexCur)
-                }
 
                    /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
                    belongsTo[indexCur] = []
@@ -520,7 +514,6 @@ Item {
                    }
            }
        }
-
        fileEdit.text = JSON.stringify(outFileContent, [], ' ')
    }
 

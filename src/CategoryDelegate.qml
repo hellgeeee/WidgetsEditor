@@ -5,6 +5,7 @@ Rectangle {
     id: delegate
 
     property bool selected: selectedCategories.indexOf(index) >= 0
+    property bool hovered: ma.containsMouse
     property color delegateColor: selected ? "#000000" : "#303030"
 
     visible: widgetsEditorManager.categories[index].name.toLowerCase().indexOf(deviceCategorySearch.text.toLowerCase()) >= 0 || deviceCategorySearch.text === ""
@@ -13,20 +14,38 @@ Rectangle {
     height: width
     anchors.horizontalCenter: parent.horizontalCenter
 
-    states: State {
+    radius: elementsRadius
+    border.color: borderColor
+
+    states: [
+        State {
         name: "brighter"
         when: selected
-        PropertyChanges { target: delegate; color: "ivory"; scale: 1; delegateColor: "#000000" }
+        PropertyChanges { target: delegate; color: "ivory"; scale: 0.95; delegateColor: "#000000" }
+    },
+        State {
+        name: "hovered"
+        when: hovered
+        PropertyChanges { target: delegate; scale: 0.8 }
     }
+    ]
 
-    transitions: Transition {
-        to: "brighter"
-        reversible: true
-        ParallelAnimation {
-            NumberAnimation {property: "scale"; duration: 500; easing.type: Easing.InQuart}
-            ColorAnimation { duration: 500 }
-        }
-    }
+    transitions: [
+        Transition {
+            to: "brighter"
+            reversible: true
+            ParallelAnimation {
+                NumberAnimation {property: "scale"; duration: 500; easing.type: Easing.InQuart}
+                ColorAnimation { duration: 500 }
+            }
+        },
+        Transition {
+            to: "hovered"
+            reversible: true
+            ParallelAnimation {
+                NumberAnimation {property: "scale"; duration: 300}
+            }
+    }]
 
     Image {
         id: categoryIcon
@@ -62,8 +81,11 @@ Rectangle {
     }
 
     MouseArea {
+        id: ma
+
         anchors.fill: parent
         scale: 1/parent.scale
+        hoverEnabled: true
         onClicked: {
             selected = addOrReplace(index, selectedCategories)
 
@@ -79,5 +101,17 @@ Rectangle {
             attributesContainer.opened = false
             fileEdit.text = ""
         }
+    }
+
+    DropShadow {
+        parent: delegate.parent
+        anchors.fill: source
+        horizontalOffset: 3
+        verticalOffset: 3
+        radius: 20.0 * scale
+        samples: 17
+        color: "#80000000"
+        source: delegate
+        scale: delegate.scale
     }
 }

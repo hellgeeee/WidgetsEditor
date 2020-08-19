@@ -6,6 +6,7 @@ Item {
     property variant scrollArea
 
     opacity: 0
+    width: smallGap
 
     Rectangle { anchors.fill: parent; color: "Black"; opacity: 0.3 }
 

@@ -58,7 +58,8 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             ToolTip.visible: containsMouse
-            ToolTip.text: "Снять выделение";
+            ToolTip.text: "Снять выделение"
+            ToolTip.delay: 300
         }
     }
 }

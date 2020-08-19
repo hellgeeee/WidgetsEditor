@@ -5,7 +5,7 @@ Text{
     height: font.pixelSize
     anchors{
         left: parent.left;
-        verticalCenter: indexCur.verticalCenter
+        verticalCenter: indexSpin.verticalCenter
     }
     wrapMode: TextEdit.WordWrap
     font: appFont

@@ -3,31 +3,52 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4 // for spinbox style
 import Qt.labs.settings 1.0
+import Qt.labs.folderlistmodel 2.14
 
 Item{
    id : attributesTab
 
-   property alias indexCur: indexCur.value
-   property alias signatureCur: signatureCur.text
-   property alias upperBoundCur: upperBoundCur.checked
-   property alias lowerBoundCur: lowerBoundCur.checked
-   property alias imageCur: imageCur.text
+   property alias indexSpinValue: indexSpin.value
+   property alias imgTxtValue: imageTxt.text
+   property string ipeFolder
 
    visible: attributesContainer.opened
+
+   onIpeFolderChanged:{
+       picsFolder.folder = "file:///" + widgetsEditorManager.IPEFolder + "/qml/resources/svg/"
+       openPicsListBtn.source = "file:///" + widgetsEditorManager.IPEFolder + "/qml/resources/svg/" +  "open_eye.svg"
+   }
+
+   /// невидима, служит для считывания каталога картинок
+   FolderListModel {
+       id: picsFolder
+       nameFilters: ["*.svg"]
+       onFolderChanged: {
+           for(var i = 0; i < picsFolder.count; i++){
+               if(picsFolder.get(i, "fileIsDir"))
+                   continue
+               var name = picsFolder.get(i,"fileBaseName")//"open_eye.svg"// todo
+               avalablePicsList.pictures[i] = []
+               avalablePicsList.pictures[i].path = "file:///" + picsFolder.get(i,"filePath")
+               avalablePicsList.pictures[i].name = name
+           }
+           avalablePicsList.model = avalablePicsList.pictures
+       }
+   }
 
    AttributeFieldPre{
        id: attributeIndexPrefix
 
        anchors{
            left: parent.left
-           verticalCenter: indexCur.verticalCenter
+           verticalCenter: indexSpin.verticalCenter
        }
        width: parent.width * 0.5
        text: qsTr("Индекс поля*")
    }
 
    SpinBox{
-       id : indexCur
+       id : indexSpin
 
        anchors{
            left: attributeIndexPrefix.right
@@ -37,6 +58,11 @@ Item{
        height: stringHeight
        font: appFont
        editable: true
+       value: 1
+       onValueModified: {
+           findIndexFstAvailable(true);
+           paramsToJson()
+       }
    }
 
    AttributeFieldPre{
@@ -44,22 +70,28 @@ Item{
 
        anchors{
            left: parent.left
-           verticalCenter: signatureCur.verticalCenter
+           verticalCenter: signatureTxt.verticalCenter
        }
        width: parent.width * 0.5
        text: qsTr("Подпись поля")
    }
 
    AttributeFieldText{
-       id : signatureCur
+       id : signatureTxt
 
        anchors{
            left: attributeSignaturePrefix.right
-           top: indexCur.bottom
+           top: indexSpin.bottom
            right: parent.right;
            margins: smallGap
        }
-       placeholderText: qsTr("Любые символы до 255 знаков")
+       placeholderText: qsTr("Любые символы")
+       onTextChanged: {
+           curentParameters[selectedParametersCount - 1].signatureCur = text
+           paramsToJson()
+       }
+       ToolTip.visible: hovered && shift < 0
+       ToolTip.delay: 300
 
        Border{}
    }
@@ -71,38 +103,46 @@ Item{
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors{
            left: parent.left
-           verticalCenter: upperBoundCur.verticalCenter
+           verticalCenter: upperBoundChb.verticalCenter
        }
        width: parent.width * 0.5
-       text: qsTr("Показывать границы *")
+       text: qsTr("Показывать границы*")
    }
 
    CheckBox {
-       id: upperBoundCur
+       id: upperBoundChb
 
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors{
-           top: signatureCur.bottom
+           top: signatureTxt.bottom
            left: attributeIndexPrefix.right
            margins: smallGap
        }
        text: qsTr("▲")
-       font: appFont
        indicator{height: stringHeight}
+       onCheckStateChanged: {
+           curentParameters[selectedParameters[selectedParametersCount - 1]].upperBoundCur = checked
+           paramsToJson()
+       }
+
    }
    CheckBox {
-       id: lowerBoundCur
+       id: lowerBoundChb
 
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors{
-           top: signatureCur.bottom
-           left: upperBoundCur.right
+           top: signatureTxt.bottom
+           left: upperBoundChb.right
            right: parent.right;
            margins: smallGap
        }
        text: qsTr("▼")
-       font: appFont
        indicator{height: stringHeight}
+       onCheckStateChanged: {
+           curentParameters[selectedParameters[selectedParametersCount - 1]].lowerBoundCur = checked
+           paramsToJson()
+       }
+
    }
 
    AttributeFieldPre{
@@ -111,63 +151,168 @@ Item{
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors {
            left: parent.left
-           verticalCenter: imageCur.verticalCenter
+           verticalCenter: imageTxt.verticalCenter
        }
        width: parent.width * 0.5
        text: qsTr("Иконка поля")
    }
 
    AttributeFieldText{
-       id : imageCur
+       id : imageTxt
 
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors{
            left: attributeIconPrefix.right
-           top: upperBoundCur.bottom;
+           top: upperBoundChb.bottom;
            right: parent.right;
            margins: smallGap
        }
 
-       placeholderText: qsTr("Любые символы до 255 знаков")
+       placeholderText: qsTr("Имя картинки")
+       onTextChanged: {
+           if(text.indexOf("\n") >= 0){ /// нажали на Enter
+               text = text.replace("\n", "")
+               curentParameters[selectedParameters[selectedParametersCount - 1]].imageCur = text // вписывание в логику
+               parametersList.itemAtIndex(selectedParameters[selectedParametersCount - 1]).setImage(text) // вписывание в интерфейс
+           }
+           paramsToJson()
+       }
+       ToolTip.text: "Введите имя без расширения и нажмите Enter"
+       ToolTip.delay: 300
+       hoverEnabled: !avalablePicsList.opened
 
-       /// Почему здесь определили тултип: потому, что этот тултип рядом со своей кнопкой saveButtonMa не становится в правильную позицию, с (у меня нет идей, почему, может, из-за поворота -90)
-       ToolTip.visible: saveButtonMa.containsMouse
-       ToolTip.text: "Сохранить текущий параметр \n(произойдет автоматически, когда перейдете на следующий)"
+       Image {
+           id: openPicsListBtn
+
+           anchors {right: parent.right; rightMargin: smallGap}
+           height: parent.height
+           width: height
+           smooth: true
+           MouseArea{
+               id: openPicsListBtnMa
+               anchors.fill: parent
+               hoverEnabled: true
+               onClicked: avalablePicsList.opened = !avalablePicsList.opened
+               ToolTip.text: "Посмотреть, какие есть"
+               ToolTip.visible: containsMouse && !avalablePicsList.opened
+               ToolTip.delay: 300
+           }
+           z: 1
+       }
 
        Border{}
    }
 
-   Image {
-       id: saveButton
+   PicturesAvailableList{
+       id: avalablePicsList
 
-       source: "qrc:/../rs/svg/download-symbol.svg"
-       height: stringHeight - smallGap
-       width: height
-       rotation: -90
-       anchors {
-           bottom: parent.bottom
-           right: parent.right
-           margins: smallGap
+       width: imageTxt.width
+       anchors{
+           bottom: imageTxt.top
+           left: imageTxt.left
        }
+   }
 
-       MouseArea {
-           id: saveButtonMa
+   //Image {
+      //id: saveButton
+      //
+      //source: "qrc:/../rs/svg/download-symbol.svg"
+      //height: stringHeight - smallGap
+      //width: height
+      //rotation: -90
+      //anchors {
+      //    bottom: parent.bottom
+      //    right: parent.right
+      //    margins: smallGap
+      //}
+      //
+      // MouseArea {
+      //     id: saveButtonMa
+      //
+      //     anchors.fill: parent
+      //     hoverEnabled: true
+      //     onClicked: {
+      //         writeParamFromGui(selectedParameters[selectedParametersCount - 1])
+      //         editingArea.paramsToJson()
+      //         //doneSound.play()
+      //     }
+      // }
+   //}
 
-           anchors.fill: parent
-           hoverEnabled: true
-           onClicked: {
-               writeParamFromGui(selectedParameters[selectedParametersCount - 1])
-               editingArea.paramsToJson(true)
-               //doneSound.play()
-           }
+   function findIndexFstAvailable(isImpactOnData = false){
+
+       /// мы запоминаем все индексы элементов, что добавлены для каждой секции во избежание добавления элементов с одинаковыми индексами
+       var indexesForTextAdded = []
+       var indexesForAnalogAdded = []
+
+       var indexFstAvailable = 1
+       /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
+       for(var i = 0; i < selectedParametersCount; i++)
+            if(curentParameters[selectedParameters[i]].representType === Mode.AttributeRepresentation.TEXT)
+               indexesForTextAdded.push(curentParameters[selectedParameters[i]].indexCur)
+            else
+               indexesForAnalogAdded.push(curentParameters[selectedParameters[i]].indexCur)
+
+       if(attributesContainer.mode === Mode.AttributeRepresentation.TEXT){
+           while(indexesForTextAdded.indexOf(indexFstAvailable) >= 0)
+               indexFstAvailable++
+
+          if(isImpactOnData){
+              if (indexesForTextAdded.indexOf(indexSpin.value) >= 0){
+                errorWnd.show("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable)
+                indexSpin.value = indexFstAvailable
+              }
+
+               /// индексу последнего выбранного
+                curentParameters[selectedParameters[selectedParametersCount - 1]].indexCur = indexSpin.value
+          }
+          else indexSpin.value = indexFstAvailable
        }
+       else {
+            while(indexesForAnalogAdded.indexOf(indexFstAvailable) >= 0)
+                indexFstAvailable++
+
+            if(isImpactOnData){
+                if (indexesForAnalogAdded.indexOf(indexSpin.value) >= 0){
+                  errorWnd.show("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable)
+                  indexSpin.value = indexFstAvailable
+                }
+
+             /// индексу последнего выбранного
+              curentParameters[selectedParameters[selectedParametersCount - 1]].indexCur = indexSpin.value
+            }
+            else indexSpin.value = indexFstAvailable
+       }
+   }
+
+   function writeParam(paramNum){
+       curentParameters[paramNum].indexCur = indexSpin.value
+       curentParameters[paramNum].signatureCur = signatureTxt.text
+       curentParameters[paramNum].representType = attributesContainer.mode
+       editingArea.parametersList.itemAtIndex(paramNum).descr =
+           curentParameters[paramNum].indexCur !== -1 ?
+               qsTr("<i><small>Вы присвоили тип " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
+               ", индекс " + curentParameters[paramNum].indexCur  +
+               " и подпись \"" + curentParameters[paramNum].signatureCur + "\" </i></small>") :
+               ""
+       if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
+           curentParameters[paramNum].upperBoundCur = upperBoundChb.checked // todo не происходит запись
+           curentParameters[paramNum].lowerBoundCur = lowerBoundChb.checked
+           curentParameters[paramNum].imageCur = imageTxt.text
+
+           editingArea.parametersList.itemAtIndex(paramNum).setImage(curentParameters[paramNum].imageCur)
+       }
+       else
+           editingArea.parametersList.itemAtIndex(paramNum).setImage("")
+       paramsToJson()
    }
 
    function clear(){
-       indexCur.value ++;
-       signatureCur.text = ""
-       upperBoundCur.checked = false
-       lowerBoundCur.checked = false
-       imageCur.text = ""
+       findIndexFstAvailable(false);
+       signatureTxt.text = ""
+       upperBoundChb.checked = false
+       lowerBoundChb.checked = false
+       imageTxt.text = ""
    }
+
 }

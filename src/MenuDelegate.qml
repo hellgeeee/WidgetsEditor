@@ -12,6 +12,7 @@ Rectangle{
     height: parent.height * 0.2
     border.color: borderColor
     color: "white"
+    radius: elementsRadius
 
     Rectangle{
         id: tile

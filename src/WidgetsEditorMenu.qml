@@ -2,7 +2,6 @@ import QtQuick 2.10
 
 Column{
     id: menu
-
     property bool opened: false
 
     anchors{
@@ -12,6 +11,7 @@ Column{
     width: Math.min(220, window.width * 0.25)
     clip: true
     z: 1
+    spacing: smallGap
 
     states: State {
         name: "opened"

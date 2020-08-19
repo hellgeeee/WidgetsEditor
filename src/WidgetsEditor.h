@@ -1,5 +1,4 @@
-#ifndef WIDGETSEDITOR_H
-#define WIDGETSEDITOR_H
+#pragma once
 
 #include <QObject>
 #include <QVariant>
@@ -34,7 +33,7 @@ public:
     bool upperBoundCur() { return _upperBoundCur; }
     void setUpperBoundCur(const bool& upperBoundCur) { _upperBoundCur = upperBoundCur; }
 
-    bool lowerBoundCur() { return _upperBoundCur; }
+    bool lowerBoundCur() { return _lowerBoundCur; }
     void setLowerBoundCur(const bool& lowerBoundCur) { _lowerBoundCur = lowerBoundCur; }
 
     QString imageCur() { return _imageCur; }
@@ -138,4 +137,3 @@ signals:
     void IPEFolderChanged();
     void selectedCategoriesChanged();
 };
-#endif // WIDGETSEDITOR_H

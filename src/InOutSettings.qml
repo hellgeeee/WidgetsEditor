@@ -42,9 +42,11 @@ Item {
                 onClicked:
                     folderDialog.open()
                 ToolTip.visible: containsMouse
-                ToolTip.text: ipeFolderInput.text === "" ? qsTr("Выбрать входной файл") : ipeFolderInput.text
+                ToolTip.text: qsTr("Выбрать")
+                ToolTip.delay: 300
             }
         }
+        ToolTip.visible: hovered && shift < 0
 
         Border{}
     }
@@ -82,9 +84,11 @@ Item {
                     fileDialog.open()
                 }
                 ToolTip.visible: containsMouse
-                ToolTip.text: inFileInput.text === "" ? qsTr("Выбрать файл существующих виджетов ") : inFileInput.text
+                ToolTip.text: qsTr("Выбрать")
+                ToolTip.delay: 300
             }
         }
+        ToolTip.visible: hovered && shift < 0
 
         Border{}
     }
@@ -122,17 +126,14 @@ Item {
             onClicked: save()            
             ToolTip.visible: containsMouse
             ToolTip.text: "Перейти к редактированию"
+            ToolTip.delay: 300
         }
     }
 
     Settings {
-        id: settings
         property alias inFileName: ipeFolderInput.text
-        property string outFilename: editingArea.outFileName
         property alias widgetsExistFileName: inFileInput.text
     }
-
-    Component.onCompleted: {print("settings.outFilename " + settings.outFilename + "window.width " + settings.inFileName)}
 
     function save(){
         /// проверка существования всех файлов ввода-вывода
@@ -149,6 +150,7 @@ Item {
         curentMode = Mode.EditingMode.GRAPHIC_EDITING
         editingArea.categoriesModel = widgetsEditorManager.categories
 
+       editingArea.attributesTab.ipeFolder = widgetsEditorManager.IPEFolder
         //doneSound.play()
     }
 

@@ -30,5 +30,6 @@
         <file>../rs/svg/file.svg</file>
         <file>../rs/svg/settings_gears.svg</file>
         <file>Border.qml</file>
+        <file>PicturesAvailableList.qml</file>
     </qresource>
 </RCC>
