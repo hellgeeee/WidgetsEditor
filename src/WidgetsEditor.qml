@@ -47,7 +47,7 @@ Item {
     width: 800
     height: 480
 
-    WidgetsEditorMenu{id: menu}
+    SideMenu{id: menu}
 
     EditingArea{id: editingArea}
 
@@ -105,7 +105,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: menu.opened = !menu.opened
-            ToolTip.visible: containsMouse
+            ToolTip.visible: containsMouse && !menu.opened
             ToolTip.text: "Опции"
             ToolTip.delay: 300
         }

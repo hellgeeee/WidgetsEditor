@@ -15,7 +15,6 @@
         <file>ParameterDelegate.qml</file>
         <file>ScrollLine.qml</file>
         <file>Tutorial.qml</file>
-        <file>WidgetsEditorMenu.qml</file>
         <file>../rs/mp3/attention.mp3</file>
         <file>../rs/mp3/done.mp3</file>
         <file>../rs/mp3/done_very_much.mp3</file>
@@ -32,5 +31,10 @@
         <file>../rs/colours.js</file>
         <file>../rs/Dark.js</file>
         <file>../rs/Light.js</file>
+        <file>SideMenu.qml</file>
+        <file>../rs/svg/info.svg</file>
+        <file>../rs/svg/light.svg</file>
+        <file>../rs/svg/pencil-edit-button.svg</file>
+        <file>../rs/svg/world.svg</file>
     </qresource>
 </RCC>

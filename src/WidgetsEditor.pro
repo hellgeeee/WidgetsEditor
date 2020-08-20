@@ -32,9 +32,11 @@ DISTFILES += \
     InOutSettings.qml \
     MenuDelegate.qml \
     Mode.qml \
-    Tutorial.qml
+    SideMenu.qml \
+    Tutorial.qml \
+    main_en.qm
 
 RESOURCES += \
     qml.qrc
 
-TRANSLATIONS = main_en.ts
+TRANSLATIONS = main_en.ts main_en.qm

@@ -182,10 +182,14 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
 }
 
 void WidgetsEditorManager::setLanguage(const QString language){
-    _translator->load("main_en", "." ); // todo
-    qApp->installTranslator(_translator);
-qDebug() << "trans installed";
     _language = language;
+    if(_language == "en"){
+    _translator->load("main_en", "." );
+    qApp->installTranslator(_translator);
+    }
+    else qApp->removeTranslator(_translator);
+    emit languageChanged();
+qDebug() << "trans installed";
 }
 
 int main(int argc, char *argv[])
@@ -205,5 +209,17 @@ int main(int argc, char *argv[])
 
     ctxt->setContextProperty("widgetsEditorManager", QVariant::fromValue(widgetsEditorManager));
     view.show();
+
+
+
+
+
+   // widgetsEditorManager->_translator->load("main_en", "." );
+   // qApp->installTranslator(widgetsEditorManager->_translator);
+   // emit widgetsEditorManager->languageChanged();
+
+
+
+
     return app.exec();
 }

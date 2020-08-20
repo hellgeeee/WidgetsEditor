@@ -3,11 +3,13 @@ import QtGraphicalEffects 1.0 // for ColorOverlay
 import "../rs/Light.js" as Styles
 
 Rectangle{
+    id: delegate
 
     property alias text: titleText.text
     property bool selected: ma.containsMouse
     property int mode
     property alias ma: ma
+    property alias image: menuItemIcon.source
 
     width: parent.width
     height: parent.height * 0.15
@@ -30,18 +32,12 @@ Rectangle{
 
         Image {
             id: menuItemIcon
+
             width: height
-            height: parent.height * 0.6
+            height: delegate.height
             anchors {
                 left: parent.left
                 verticalCenter: parent.verticalCenter
-            }
-
-            source: "qrc:/../rs/svg/settings_gears.svg" // todo
-            ColorOverlay {
-                anchors.fill: parent
-                source: parent
-                color: tile.curColor  // make image like it lays under white glass
             }
         }
 
@@ -49,7 +45,7 @@ Rectangle{
             id: titleText
 
             wrapMode: Text.WrapAnywhere
-            anchors.left: menuItemIcon.right
+            anchors {left: menuItemIcon.right; leftMargin: smallGap * 0.5}
             verticalAlignment: Text.AlignVCenter
             font: typeof(appFont) !== "undefined" ?  appFont : font
             color: tile.curColor

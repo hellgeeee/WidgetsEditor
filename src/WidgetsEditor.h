@@ -96,7 +96,7 @@ class WidgetsEditorManager : public QObject{
     Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
     Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
     Q_PROPERTY(QString selectedCategories WRITE setSelectedCategories NOTIFY selectedCategoriesChanged)
-    Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
+    Q_PROPERTY(QString language READ language /*WRITE setLanguage*/ NOTIFY languageChanged)
 
 public:
     WidgetsEditorManager(QObject* parent = nullptr) : QObject(parent) { _translator = new QTranslator(this); }
@@ -121,8 +121,9 @@ public:
     void setOutFileContent(const QString&);
     void setSelectedCategories(const QString&);
 
-    QString language() {return _language;}
+    QString language() {return "";}
     void setLanguage(const QString);
+    QTranslator* _translator;
 
 private:
     QList<QObject*> parse();
@@ -133,7 +134,6 @@ private:
     QString _IPEFolder{ "" };
     QJsonObject _existingWidgetsJsn;
     QString _language{"ru"};
-    QTranslator* _translator;
 
 signals:
     void inFileChanged();

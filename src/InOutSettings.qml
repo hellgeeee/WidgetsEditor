@@ -16,7 +16,9 @@ Item {
            left: ipeFolderInput.left
        }
        font: appFont
-       text: "<small><b>Папка, содержащая файл IntegraPlanetEarth.exe</b></small>"
+       text: "<small><b>Папка, содержащая файл IntegraPlanetEarth.exe</b></small>" +
+             (typeof(widgetsEditorManager) !== "undefined" ? widgetsEditorManager.language : "")
+      // Component.onCompleted: print(typeof(widgetsEditorManager) + " and "+ widgetsEditorManager  )
     }
 
     AttributeFieldText{
