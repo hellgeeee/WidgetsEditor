@@ -10,6 +10,7 @@ QtObject {
   }
     enum AttributeRepresentation {
       TEXT = 0,
-      ANALOG = 1
+      ANALOG = 1,
+      BOOL = 2
     }
 }

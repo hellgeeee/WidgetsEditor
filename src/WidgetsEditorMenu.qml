@@ -45,7 +45,8 @@ Column{
    }
    MenuDelegate{
        text: qsTr("<h4>Change Language</h4>")
-       mode: Mode.EditingMode.ABOUT
+       mode: curentMode
+       ma.onClicked: widgetsEditorManager.language = "en"
    }
 
 }

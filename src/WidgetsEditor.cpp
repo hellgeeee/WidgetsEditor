@@ -181,6 +181,13 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
     file.close();
 }
 
+void WidgetsEditorManager::setLanguage(const QString language){
+    _translator->load("main_en", "." ); // todo
+    qApp->installTranslator(_translator);
+qDebug() << "trans installed";
+    _language = language;
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -198,6 +205,5 @@ int main(int argc, char *argv[])
 
     ctxt->setContextProperty("widgetsEditorManager", QVariant::fromValue(widgetsEditorManager));
     view.show();
-
     return app.exec();
 }

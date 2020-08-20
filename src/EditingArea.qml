@@ -120,6 +120,8 @@ Item {
        ListView {
            id: parametersList
 
+           property bool isUpdatingNow: false
+
            anchors {
                left: deviceCategoriesList.right; leftMargin: smallGap
            }
@@ -127,6 +129,13 @@ Item {
            width: stringHeight * 12
            model: curentParameters
            delegate: ParameterDelegate {}
+           onModelChanged: {
+               /// для анимации нового списка параметров
+               isUpdatingNow = true
+               pause(5000).triggered.connect(function () {
+                   isUpdatingNow = false
+               })
+           }
 
            Footer{
                id: paramsInfoLine
@@ -210,20 +219,56 @@ Item {
               rotation: 90
               x: (-width + height )/ 2 + 1 // +1 и +2 здесь для того, чтобы кнопки не загораживали рамку
               y: - x + 2
-              height: textRepresentationModeBtn.height
+              height: stringHeight * 1.5
               currentIndex: 0
               font: appFont
 
                TabButton {
                    id: textRepresentationModeBtn
 
-                   width: attributesContainer.height * 0.5
-                   text: qsTr("Текстовое")
+                   width: attributesContainer.height * 0.33
+                   height: parent.height
+                   anchors.bottom: parent.bottom
+                   Text{
+                       font: appFont
+                       rotation: -30; text: qsTr("<b>Текстовый</b>");
+                       color: textRepresentationModeBtn.checked ? "black" : "white"
+                       anchors.centerIn: parent
+                       verticalAlignment: Text.AlignVCenter
+                       scale: 0.7
+                   }
                }
 
                TabButton {
+                   id: analogRepresentationModeBtn
+
                    width: textRepresentationModeBtn.width
-                   text: qsTr("Аналоговое")
+                   height: parent.height
+                   anchors.bottom: parent.bottom
+                   Text{
+                       font: appFont
+                       rotation: -30; text: qsTr("<b>Аналоговый</b>");
+                       color: analogRepresentationModeBtn.checked ? "black" : "white"
+                       anchors.centerIn: parent
+                       verticalAlignment: Text.AlignVCenter
+                       scale: 0.7
+                   }
+               }
+
+               TabButton {
+                   id: boolRepresentationModeBtn
+
+                   width: textRepresentationModeBtn.width
+                   height: parent.height
+                   anchors.bottom: parent.bottom
+                   Text{
+                       font: appFont
+                       rotation: -30; text: qsTr("<b>Битовый</b>");
+                       color: boolRepresentationModeBtn.checked ? "black" : "white"
+                       anchors.centerIn: parent
+                       verticalAlignment: Text.AlignVCenter
+                       scale: 0.7
+                   }
                }
 
            }
@@ -256,7 +301,6 @@ Item {
                contentHeight: fileEdit.height
                clip: true
 
-               //Rectangle{color: "#000000"; anchors.fill: parent}
                TextArea{
                    id: fileEdit
 
@@ -489,42 +533,57 @@ Item {
 
    function paramsToJson(){
 
-       /// инициализация выходного объекта, делается один раз за одну выборку категорий
        with(JSON){
                outFileContent["text_params"] = parse('{}')
                outFileContent["analog_params"] = parse('{}')
                outFileContent["param_icons"] = parse('{}')
+               outFileContent["switch_params"] = parse('{}')
        }
 
        for(var i = 0; i < selectedParameters.length; i++){
-           /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
-           var belongsTo, notBelongsTo
-           var isTextRepresent
-           with(curentParameters[selectedParameters[i]]){ // name вместо curentParameters[selectedParameters[i]].name и т.д.
-               isTextRepresent = representType === Mode.AttributeRepresentation.TEXT
-               belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
-               notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
 
+           /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
+           var belongsTo, notBelongTo1, notBelongTo2
+           with(curentParameters[selectedParameters[i]]){ // name вместо curentParameters[selectedParameters[i]].name и т.д.
+               //if()
+               belongsTo =
+                representType === Mode.AttributeRepresentation.TEXT ?
+                   outFileContent["text_params"] :
+                   representType === Mode.AttributeRepresentation.ANALOG ?
+                       outFileContent["analog_params"] :
+                       outFileContent["switch_params"]
+               notBelongTo1 = outFileContent["text_params"]
+               notBelongTo2 = outFileContent["analog_params"]
+               if (representType === Mode.AttributeRepresentation.TEXT)
+                    notBelongTo1 = outFileContent["switch_params"]
+               else if(representType === Mode.AttributeRepresentation.TEXT)
+                    notBelongTo2 = outFileContent["switch_params"]
 
                    /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней
                    belongsTo[indexCur] = []
                    belongsTo[indexCur][0] = name
                    belongsTo[indexCur][1] = signatureCur
                    /// в случае, если  секция аналоговая, еще двух параметров и добавление картинки в секцию картинок
-                   if(!isTextRepresent){
+                   if(representType === Mode.AttributeRepresentation.ANALOG){
                        belongsTo[indexCur][2] = upperBoundCur
                        belongsTo[indexCur][3] = lowerBoundCur
                        if(imageCur != "")
                             outFileContent["param_icons"][name] = imageCur
                    }
 
-                   ///если же текстовая, надо удалить картинки из секции картинок
+                   ///если не аналоговая, надо удалить картинки из секции картинок
                    else
                        delete outFileContent["param_icons"][name]
 
-               /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой)
+               /// извлечение из секции, которой атрибут не принадлежит (аналоговой или текстовой или булевой)
                var anotherSectionParam
-               for (anotherSectionParam in notBelongsTo)
+               for (anotherSectionParam in notBelongTo1)
+                   if(anotherSectionParam[0] === name){
+                        delete anotherSectionParam
+                       break;
+                   }
+
+               for (anotherSectionParam in notBelongTo2)
                    if(anotherSectionParam[0] === name){
                         delete anotherSectionParam
                        break;

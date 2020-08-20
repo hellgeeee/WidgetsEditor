@@ -70,6 +70,7 @@ Item{
 
    AttributeFieldPre{
        id: attributeSignaturePrefix
+       visible: bar.currentIndex !== Mode.AttributeRepresentation.BOOL
 
        anchors{
            left: parent.left
@@ -81,6 +82,7 @@ Item{
 
    AttributeFieldText{
        id : signatureTxt
+       visible: bar.currentIndex !== Mode.AttributeRepresentation.BOOL
 
        anchors{
            left: attributeSignaturePrefix.right
@@ -217,14 +219,16 @@ Item{
        /// мы запоминаем все индексы элементов, что добавлены для каждой секции во избежание добавления элементов с одинаковыми индексами
        var indexesForTextAdded = []
        var indexesForAnalogAdded = []
+       var indexesForBoolAdded = []
 
        var indexFstAvailable = 1
        /// выяснение, в режиме редактирования секции каких параметров мы оказались - текстовых или аналоговых
        for(var i = 0; i < selectedParametersCount; i++)
             if(curentParameters[selectedParameters[i]].representType === Mode.AttributeRepresentation.TEXT)
                indexesForTextAdded.push(curentParameters[selectedParameters[i]].indexCur)
-            else
+            else if(curentParameters[selectedParameters[i]].representType === Mode.AttributeRepresentation.ANALOG)
                indexesForAnalogAdded.push(curentParameters[selectedParameters[i]].indexCur)
+            else indexesForBoolAdded.push(curentParameters[selectedParameters[i]].indexCur)
 
        if(attributesContainer.mode === Mode.AttributeRepresentation.TEXT){
            while(indexesForTextAdded.indexOf(indexFstAvailable) >= 0)
@@ -241,7 +245,7 @@ Item{
           }
           else indexSpin.value = indexFstAvailable
        }
-       else {
+       else if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
             while(indexesForAnalogAdded.indexOf(indexFstAvailable) >= 0)
                 indexFstAvailable++
 
@@ -256,27 +260,44 @@ Item{
             }
             else indexSpin.value = indexFstAvailable
        }
+       else {
+           while(indexesForBoolAdded.indexOf(indexFstAvailable) >= 0)
+               indexFstAvailable++
+
+           if(isImpactOnData){
+               if (indexesForBoolAdded.indexOf(indexSpin.value) >= 0){
+                 errorWnd.show(qsTr("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable))
+                 indexSpin.value = indexFstAvailable
+               }
+
+            /// индексу последнего выбранного
+             curentParameters[selectedParameters[selectedParametersCount - 1]].indexCur = indexSpin.value
+           }
+           else indexSpin.value = indexFstAvailable
+      }
    }
 
    function writeParam(paramNum){
        curentParameters[paramNum].indexCur = indexSpin.value
-       curentParameters[paramNum].signatureCur = signatureTxt.text
        curentParameters[paramNum].representType = attributesContainer.mode
-       editingArea.parametersList.itemAtIndex(paramNum).descr =
-           curentParameters[paramNum].indexCur !== -1 ?
-               qsTr("<i><small>Вы присвоили тип " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
-               ", индекс " + curentParameters[paramNum].indexCur  +
-               " и подпись \"" + curentParameters[paramNum].signatureCur + "\" </i></small>") :
-               ""
-       if(curentParameters[paramNum].representType === Mode.AttributeRepresentation.ANALOG){
+       if(attributesContainer.mode === Mode.AttributeRepresentation.ANALOG){
+           curentParameters[paramNum].signatureCur = signatureTxt.text
            curentParameters[paramNum].upperBoundCur = upperBoundChb.checked // todo не происходит запись
            curentParameters[paramNum].lowerBoundCur = lowerBoundChb.checked
            curentParameters[paramNum].imageCur = imageTxt.text
 
            editingArea.parametersList.itemAtIndex(paramNum).setImage(curentParameters[paramNum].imageCur)
        }
-       else
+       else if(attributesContainer.mode === Mode.AttributeRepresentation.TEXT){
+           curentParameters[paramNum].signatureCur = signatureTxt.text
            editingArea.parametersList.itemAtIndex(paramNum).setImage("")
+       }
+
+           editingArea.parametersList.itemAtIndex(paramNum).descr =
+               qsTr("<i><small>Вы присвоили тип " + (curentParameters[paramNum].representType === Mode.AttributeRepresentation.TEXT ? "текстовый" : "аналоговый") +
+               ", индекс " + curentParameters[paramNum].indexCur  +
+               (attributesContainer.mode !== Mode.AttributeRepresentation.BOOL ? (" и подпись \"" + curentParameters[paramNum].signatureCur + "\"") : "") +
+               " </i></small>")
        paramsToJson()
    }
 

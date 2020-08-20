@@ -23,13 +23,13 @@ Item{ // todo get rid of outer Rectangle
     height: stringHeight * 2
 
     /// вращение по появлению
-    Component.onCompleted: showAnim.start();
+    Component.onCompleted: if(parametersList.isUpdatingNow) showAnim.start()
     transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
     SequentialAnimation {
         id: showAnim
         running: false
-        RotationAnimation { target: rt; from: 0; to: 45; duration: 100 * (index % (window.height / height)); easing.type: Easing.OutQuart; property: "angle" } // можно просто 200 * index
-        RotationAnimation { target: rt; from: 45; to: 0; duration: 100 * (index % (window.height / height)); easing.type: Easing.InQuart; property: "angle" }
+        RotationAnimation { target: rt; from: 0; to: 45; duration: 100 * (index + 1); easing.type: Easing.OutQuart; property: "angle" }
+        RotationAnimation { target: rt; from: 45; to: 0; duration: 100 * (index + 1) ; easing.type: Easing.InQuart; property: "angle" }
     }
 
     Rectangle {

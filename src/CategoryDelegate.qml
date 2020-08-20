@@ -93,14 +93,13 @@ Rectangle {
             var curentParametersOld = curentParameters
             curentParameters = findAvailableParamsIntersection()
             selectedParameters = updateSelectedForNewAvailable(selectedParameters, curentParametersOld, curentParameters)
-print("selected parameters recounted: " + selectedParameters)
             selectedParametersCount = selectedParameters.length
 
             // костыль, почему-то не обновляется автоматически
             parametersList.model = []
             parametersList.model = curentParameters
             attributesContainer.opened = selectedParametersCount > 0
-            fileEdit.text = ""
+            paramsToJson()
         }
     }
 

@@ -4,25 +4,23 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="About.qml" line="28"/>
         <source>&lt;b&gt;Дата релиза:&lt;/b&gt;
             01.08.2020 &lt;br&gt;&lt;br&gt;
            &lt;b&gt;Техническое задание:&lt;/b&gt;
             &lt;html&gt;&lt;style type=&quot;text/css&quot;&gt;&lt;/style&gt;
             &lt;a href=&quot;https://prnt.sc/tib7ah&quot;&gt;http://wiki.integra-s.com&lt;/a&gt;&lt;/html&gt;</source>
-        <translation>&lt;b&gt;Release date:&lt;/b&gt;
+        <translation type="vanished">&lt;b&gt;Release date:&lt;/b&gt;
             2020/08/01 &lt;br&gt;&lt;br&gt;
            &lt;b&gt;Specification:&lt;/b&gt;
             &lt;html&gt;&lt;style type=&quot;text/css&quot;&gt;&lt;/style&gt;
             &lt;a href=&quot;https://prnt.sc/tib7ah&quot;&gt;http://wiki.integra-s.com&lt;/a&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="About.qml" line="43"/>
         <source>&lt;b&gt;Инструкция:&lt;/b&gt;
            &lt;html&gt;&lt;style type=&quot;text/css&quot;&gt;&lt;/style&gt;
             &lt;a href=&quot;http://wiki.integra-s.com:11111/index.php/%D0%98%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0-%D0%A1&quot;&gt;
             Схема взаимодействия с пользователем&lt;/a&gt;&lt;/html&gt;&lt;br&gt;</source>
-        <translation>&lt;b&gt;Leading:&lt;/b&gt;
+        <translation type="vanished">&lt;b&gt;Leading:&lt;/b&gt;
            &lt;html&gt;&lt;style type=&quot;text/css&quot;&gt;&lt;/style&gt;
             &lt;a href=&quot;http://wiki.integra-s.com:11111/index.php/%D0%98%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0-%D0%A1&quot;&gt;
              User interaction scheme&lt;/a&gt;&lt;/html&gt;&lt;br&gt;</translation>
@@ -31,138 +29,111 @@
 <context>
     <name>AttributesTab</name>
     <message>
-        <location filename="AttributesTab.qml" line="50"/>
         <source>Индекс поля*</source>
-        <translation>Field index</translation>
+        <translation type="vanished">Field index</translation>
     </message>
     <message>
-        <location filename="AttributesTab.qml" line="79"/>
         <source>Подпись поля</source>
-        <translation>Field signature</translation>
+        <translation type="vanished">Field signature</translation>
     </message>
     <message>
-        <location filename="AttributesTab.qml" line="91"/>
         <source>Любые символы</source>
-        <translation>Any symbols</translation>
+        <translation type="vanished">Any symbols</translation>
     </message>
     <message>
-        <location filename="AttributesTab.qml" line="110"/>
         <source>Показывать границы*</source>
-        <translation>Show boundaries</translation>
+        <translation type="vanished">Show boundaries</translation>
     </message>
     <message>
-        <location filename="AttributesTab.qml" line="157"/>
         <source>Иконка поля</source>
-        <translation>Field icon</translation>
+        <translation type="vanished">Field icon</translation>
     </message>
     <message>
-        <location filename="AttributesTab.qml" line="172"/>
         <source>Имя картинки</source>
-        <translation>File name</translation>
+        <translation type="vanished">File name</translation>
     </message>
 </context>
 <context>
     <name>EditingArea</name>
     <message>
-        <location filename="EditingArea.qml" line="33"/>
         <source>Поиск</source>
-        <translation>Search</translation>
+        <translation type="vanished">Search</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="221"/>
         <source>Текстовое</source>
-        <translation>Text</translation>
+        <translation type="vanished">Text</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="226"/>
         <source>Аналоговое</source>
-        <translation>Analog</translation>
+        <translation type="vanished">Analog</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="272"/>
         <source>Пока что пусто</source>
-        <translation>Empty yet</translation>
+        <translation type="vanished">Empty yet</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="300"/>
         <source>Выходной файл</source>
-        <translation>Output file</translation>
+        <translation type="vanished">Output file</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="313"/>
         <source>Выбор текстового файла вывода</source>
-        <translation>Choose output text file</translation>
+        <translation type="vanished">Choose output text file</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="346"/>
         <source>Выбрать выходной файл</source>
-        <translation>Choose output file</translation>
+        <translation type="vanished">Choose output file</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="375"/>
         <source>Прочитать выходной файл</source>
-        <translation>Read output file</translation>
+        <translation type="vanished">Read output file</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="400"/>
         <source>Внимание, сохранение в файл не было произведено, потому что имя выходного файла недопустимо</source>
-        <translation>Attention! Nothing was saved because output file name is unavailable</translation>
+        <translation type="vanished">Attention! Nothing was saved because output file name is unavailable</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="418"/>
         <source>Внимание, сохранение в файл не было произведено, поскольку никаких атрибутов выбрано и записано не было. Пустой виджет не имеет смысла</source>
-        <translation>Attention! Nothing was saved because no attributes were chosen and written. Empty widget is no use</translation>
+        <translation type="vanished">Attention! Nothing was saved because no attributes were chosen and written. Empty widget is no use</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="423"/>
         <source>Файл вывода уже существует и будет перезаписан. Продолжить?</source>
-        <translation>This file exists and will be rewritten. Do you want to continue?</translation>
+        <translation type="vanished">This file exists and will be rewritten. Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="425"/>
         <source>Файл вывода не существует, перед записью он будет создан. Продолжить?</source>
-        <translation>This file doesn&apos;t exist and will be created before writing. Do you want to continue?</translation>
+        <translation type="vanished">This file doesn&apos;t exist and will be created before writing. Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="EditingArea.qml" line="552"/>
         <source>Ошибка синтаксиса в текстовом файле вывода. Проверьте пожалуйста правильность выражений либо отредактируйте в графическом режиме</source>
-        <translation>Syntax mistake ocured in output text. Please check and correct your sentences or edit widget in graphical mode</translation>
+        <translation type="vanished">Syntax mistake ocured in output text. Please check and correct your sentences or edit widget in graphical mode</translation>
     </message>
 </context>
 <context>
     <name>InOutSettings</name>
     <message>
-        <location filename="InOutSettings.qml" line="28"/>
-        <location filename="InOutSettings.qml" line="67"/>
         <source>Введите путь и название либо выбирете из файловой системы</source>
-        <translation>Type path and name of file or choose from file system</translation>
+        <translation type="vanished">Type path and name of file or choose from file system</translation>
     </message>
     <message>
-        <location filename="InOutSettings.qml" line="45"/>
-        <location filename="InOutSettings.qml" line="85"/>
         <source>Выбрать</source>
-        <translation>Choose</translation>
+        <translation type="vanished">Choose</translation>
     </message>
     <message>
-        <location filename="InOutSettings.qml" line="94"/>
         <source>Выбор папки приложения Integra Planet Earth</source>
-        <translation>Choose directory of Integra Planet Earth application</translation>
+        <translation type="vanished">Choose directory of Integra Planet Earth application</translation>
     </message>
     <message>
-        <location filename="InOutSettings.qml" line="101"/>
         <source>Выбор текстового файла</source>
-        <translation>Choose text file</translation>
+        <translation type="vanished">Choose text file</translation>
     </message>
     <message>
-        <location filename="InOutSettings.qml" line="137"/>
         <source>Ошибка, один из файлов не был найден. Пожалуйста проверьте правильность ввода пути и имени файла или создайте такой файл</source>
-        <translation>Error! One of file is not found. Please check file path and file name or create a file with such path and name</translation>
+        <translation type="vanished">Error! One of file is not found. Please check file path and file name or create a file with such path and name</translation>
     </message>
 </context>
 <context>
     <name>Tutorial</name>
     <message>
-        <location filename="Tutorial.qml" line="12"/>
         <source>&lt;h2&gt;Приступая к работе&lt;/h2&gt;&lt;br&gt;&lt;br&gt;
 
             &lt;b&gt;Перед началом работы необходимо &lt;/b&gt; настроить редактор:
@@ -201,8 +172,8 @@
 
             Для того, чтобы редактировать текста выходного файла самостоятельно,
             Вам нужно выбрать &quot;Редактирование в текстовом режиме&quot; в настройках.</source>
-        <translation type="unfinished">&lt;h2&gt;Getting started&lt;/h2&gt;&lt;br&gt;&lt;br&gt;
-
+        <translation type="vanished">&lt;h2&gt;Getting started&lt;/h2&gt;&lt;br&gt;&lt;br&gt;
+todo перевести
             &lt;b&gt;Перед началом работы необходимо &lt;/b&gt; настроить редактор:
             указать расположение папки «./qml/SensorView»
             указать расположение файла «typedef.json»&lt;br&gt;&lt;br&gt;
@@ -245,29 +216,24 @@ esourcessvg» относительно корневой
 <context>
     <name>WidgetsEditorMenu</name>
     <message>
-        <location filename="WidgetsEditorMenu.qml" line="31"/>
         <source>&lt;h4&gt;Редактирование виджета&lt;/h4&gt;</source>
-        <translation>Widget editing</translation>
+        <translation type="vanished">Widget editing</translation>
     </message>
     <message>
-        <location filename="WidgetsEditorMenu.qml" line="35"/>
         <source>&lt;h4&gt;Файлы ввода данных&lt;/h4&gt;</source>
-        <translation>Input data files</translation>
+        <translation type="vanished">Input data files</translation>
     </message>
     <message>
-        <location filename="WidgetsEditorMenu.qml" line="39"/>
         <source>&lt;h4&gt;Приступая к работе&lt;/h4&gt;</source>
-        <translation>Getting started</translation>
+        <translation type="vanished">Getting started</translation>
     </message>
     <message>
-        <location filename="WidgetsEditorMenu.qml" line="43"/>
         <source>&lt;h4&gt;О Виджите&lt;/h4&gt;</source>
-        <translation>About</translation>
+        <translation type="vanished">About</translation>
     </message>
     <message>
-        <location filename="WidgetsEditorMenu.qml" line="47"/>
         <source>&lt;h4&gt;Change Language&lt;/h4&gt;</source>
-        <translation>Change Language</translation>
+        <translation type="vanished">Change Language</translation>
     </message>
 </context>
 </TS>

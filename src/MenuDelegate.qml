@@ -7,6 +7,7 @@ Rectangle{
     property alias text: titleText.text
     property bool selected: ma.containsMouse
     property int mode
+    property alias ma: ma
 
     width: parent.width
     height: parent.height * 0.15
