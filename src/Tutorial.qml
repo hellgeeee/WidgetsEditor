@@ -1,4 +1,6 @@
 import QtQuick 2.10
+import "../rs/Light.js" as Styles
+
 Item {
     id: tutorial
 
@@ -48,5 +50,7 @@ Item {
             Вам нужно выбрать "Редактирование в текстовом режиме" в настройках.' )
             textFormat: Text.StyledText
             wrapMode: Text.WordWrap
+            font: appFont
+            color: Styles.Input.textColor
        }
 }

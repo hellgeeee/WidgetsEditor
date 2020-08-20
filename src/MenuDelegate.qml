@@ -1,6 +1,6 @@
-
 import QtQuick 2.10
 import QtGraphicalEffects 1.0 // for ColorOverlay
+import "../rs/Light.js" as Styles
 
 Rectangle{
 
@@ -9,7 +9,7 @@ Rectangle{
     property int mode
 
     width: parent.width
-    height: parent.height * 0.2
+    height: parent.height * 0.15
     border.color: borderColor
     color: "white"
     radius: elementsRadius
@@ -17,7 +17,7 @@ Rectangle{
     Rectangle{
         id: tile
 
-        property color curColor: selected ? "#000000" : "#303030"
+        property color curColor: selected ? Styles.Input.textColor : Styles.Button.textColor
 
         anchors{
             fill: parent
@@ -48,11 +48,8 @@ Rectangle{
             id: titleText
 
             wrapMode: Text.WrapAnywhere
-            anchors{
-                verticalCenter: parent.verticalCenter
-                left: menuItemIcon.right
-            }
-
+            anchors.left: menuItemIcon.right
+            verticalAlignment: Text.AlignVCenter
             font: typeof(appFont) !== "undefined" ?  appFont : font
             color: tile.curColor
         }

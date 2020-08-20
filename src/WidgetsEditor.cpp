@@ -181,10 +181,8 @@ void WidgetsEditorManager::setSelectedCategories(const QString& newWidgetCategor
     file.close();
 }
 
-
 int main(int argc, char *argv[])
 {
-
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setOrganizationName("Integra-s");
     QGuiApplication app(argc, argv);
@@ -197,6 +195,7 @@ int main(int argc, char *argv[])
         return -1;
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     QQmlContext *ctxt = view.rootContext();
+
     ctxt->setContextProperty("widgetsEditorManager", QVariant::fromValue(widgetsEditorManager));
     view.show();
 

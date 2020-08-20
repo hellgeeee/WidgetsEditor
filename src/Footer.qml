@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.14
+import "../rs/Light.js" as Styles
 
 Rectangle {
     id: infoBox
@@ -17,7 +18,7 @@ Rectangle {
     }
 
     height: stringHeight + 2
-    color: "black"
+    color: Styles.Shadow.deepColor
 
     /// для сокрытия при сжатии окна
     visible: parent.parent.visible

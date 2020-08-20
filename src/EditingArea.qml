@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import Qt.labs.platform 1.1
 import Qt.labs.settings 1.0
-
 import QtQuick.Extras 1.4
+import "../rs/Light.js" as Styles
 
 //todo разбить
 Item {
@@ -35,8 +35,6 @@ Item {
         font.pixelSize: stringHeight * 0.5
         ToolTip.visible: hovered && shift < 0
         ToolTip.delay: 300
-
-        Border{bBorder: 0}
     }
 
 
@@ -55,7 +53,7 @@ Item {
     ListView {
        id: deviceCategoriesList
 
-       width: stringHeight * 4
+       width: stringHeight * 8
        anchors {
            top: deviceCategorySearch.bottom;
            bottom: parent.bottom
@@ -84,19 +82,18 @@ Item {
                /// Обновление списка. Пауза - чтобы возвращение к началу происходило красиво
                /// но это костыль: обновление внешнего вида модели не происходит естественным путем почему-то
                deviceCategoriesList.flick(0, deviceCategoriesList.maximumFlickVelocity)
+               attributesContainer.opened = false
+               parametersList.model = []
+
                pause(500).triggered.connect(function () {
+                   deviceCategoriesList.model = []
                    deviceCategoriesList.model = widgetsEditorManager.categories
-                   parametersList.model = []
                })
 
                /// костыль! должно обновиться автоматически
-               deviceCategoriesList.model = []
-               attributesContainer.opened = false
                fileEdit.text = ""
            }
        }
-
-       Border{}
     }
 
    ScrollLine {
@@ -288,9 +285,7 @@ Item {
            }
        }
 
-
        Item{
-
            anchors{
                top: fileEditContainer.bottom
                right: fileEditContainer.right
@@ -298,11 +293,10 @@ Item {
            height: stringHeight
            width: fileEditContainer.width
 
-           Border{}
-
            AttributeFieldText{
                id: outFileNameInput
 
+               isBorder: false
                placeholderText: qsTr("Выходной файл")
                 anchors{
                     right: outFileCoiceBtn.left
@@ -371,6 +365,7 @@ Item {
                    anchors.fill: parent
                    hoverEnabled: true
                    onClicked: {
+
                        /// в с++ в сеттере outFileName происходит считывание файла в свойство outFileContent
                        widgetsEditorManager.outFileName = outFileNameInput.text
                        fileEdit.text = widgetsEditorManager.outFileContent
@@ -425,9 +420,9 @@ Item {
                    }
 
                    if(inOutSettings.doesFileExist(widgetsEditorManager.outFileName))
-                       fileRecordQuestionWnd.show("Файл вывода уже существует и будет перезаписан. Продолжить?")
+                       fileRecordQuestionWnd.show(qsTr("Файл вывода уже существует и будет перезаписан. Продолжить?"))
                    else
-                       fileRecordQuestionWnd.show("Файл вывода не существует, перед записью он будет создан. Продолжить?")
+                       fileRecordQuestionWnd.show(qsTr("Файл вывода не существует, перед записью он будет создан. Продолжить?"))
 
                    //pause(5000).triggered.connect(function () {
                    //
@@ -454,6 +449,28 @@ Item {
                }
            }
 
+       }
+
+       /// вертикальные разделители
+
+       Rectangle{
+           anchors{
+               top: parent.top; topMargin: smallGap
+               bottom: parent.bottom; bottomMargin: smallGap
+               right: deviceCategoriesList.right
+           }
+           width: 1
+           color: Styles.Application.borderColor
+       }
+
+       Rectangle{
+           anchors{
+               top: parent.top; topMargin: smallGap
+               bottom: parent.bottom; bottomMargin: smallGap
+               right: parametersList.right
+           }
+           width: 1
+           color: Styles.Application.borderColor
        }
 
    function addOrReplace(curItemNum, selectedItems){
@@ -484,9 +501,9 @@ Item {
            var belongsTo, notBelongsTo
            var isTextRepresent
            with(curentParameters[selectedParameters[i]]){ // name вместо curentParameters[selectedParameters[i]].name и т.д.
-           isTextRepresent = representType === Mode.AttributeRepresentation.TEXT
-           belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
-           notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
+               isTextRepresent = representType === Mode.AttributeRepresentation.TEXT
+               belongsTo = isTextRepresent ? outFileContent["text_params"] : outFileContent["analog_params"]
+               notBelongsTo = isTextRepresent ? outFileContent["analog_params"] : outFileContent["text_params"]
 
 
                    /// добавление в нужную секцию (аналоговую или текстовую) либо переписывание параметров в ней

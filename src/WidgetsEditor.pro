@@ -36,3 +36,5 @@ DISTFILES += \
 
 RESOURCES += \
     qml.qrc
+
+TRANSLATIONS = main_en.ts

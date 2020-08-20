@@ -23,8 +23,4 @@ MessageDialog {
         //else
         //    errorSound.play()
     }
-
-    //function choiceDone(){
-    //    isQuestion = false
-    //}
 }

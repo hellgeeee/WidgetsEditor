@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4 // for spinbox style
 import Qt.labs.settings 1.0
 import Qt.labs.folderlistmodel 2.14
+import "../rs/Light.js" as Styles
 
 Item{
    id : attributesTab
@@ -22,15 +23,17 @@ Item{
    /// невидима, служит для считывания каталога картинок
    FolderListModel {
        id: picsFolder
-       nameFilters: ["*.svg"]
+       nameFilters: ["*.svg"] // похоже, не срабатывает
        onFolderChanged: {
+           var numActual = 0
            for(var i = 0; i < picsFolder.count; i++){
-               if(picsFolder.get(i, "fileIsDir"))
+               if(picsFolder.get(i, "fileIsDir") || picsFolder.get(i, "fileSuffix") !== "svg")
                    continue
                var name = picsFolder.get(i,"fileBaseName")//"open_eye.svg"// todo
-               avalablePicsList.pictures[i] = []
-               avalablePicsList.pictures[i].path = "file:///" + picsFolder.get(i,"filePath")
-               avalablePicsList.pictures[i].name = name
+               avalablePicsList.pictures[numActual] = []
+               avalablePicsList.pictures[numActual].path = "file:///" + picsFolder.get(i,"filePath")
+               avalablePicsList.pictures[numActual].name = name
+               numActual++
            }
            avalablePicsList.model = avalablePicsList.pictures
        }
@@ -92,8 +95,6 @@ Item{
        }
        ToolTip.visible: hovered && shift < 0
        ToolTip.delay: 300
-
-       Border{}
    }
 
    /// следующие два атрибута должны появляться лишь в случае, если поле аналоговое, т.е. выбрана вкладка bar.currentIndex == 1
@@ -118,7 +119,7 @@ Item{
            left: attributeIndexPrefix.right
            margins: smallGap
        }
-       text: qsTr("▲")
+       text: "▲"
        indicator{height: stringHeight}
        onCheckStateChanged: {
            curentParameters[selectedParameters[selectedParametersCount - 1]].upperBoundCur = checked
@@ -136,13 +137,12 @@ Item{
            right: parent.right;
            margins: smallGap
        }
-       text: qsTr("▼")
+       text: "▼"
        indicator{height: stringHeight}
        onCheckStateChanged: {
            curentParameters[selectedParameters[selectedParametersCount - 1]].lowerBoundCur = checked
            paramsToJson()
        }
-
    }
 
    AttributeFieldPre{
@@ -159,6 +159,7 @@ Item{
 
    AttributeFieldText{
        id : imageTxt
+       z : 1
 
        visible: bar.currentIndex === Mode.AttributeRepresentation.ANALOG
        anchors{
@@ -199,8 +200,6 @@ Item{
            }
            z: 1
        }
-
-       Border{}
    }
 
    PicturesAvailableList{
@@ -208,36 +207,10 @@ Item{
 
        width: imageTxt.width
        anchors{
-           bottom: imageTxt.top
+           bottom: imageTxt.top; bottomMargin: -radius
            left: imageTxt.left
        }
    }
-
-   //Image {
-      //id: saveButton
-      //
-      //source: "qrc:/../rs/svg/download-symbol.svg"
-      //height: stringHeight - smallGap
-      //width: height
-      //rotation: -90
-      //anchors {
-      //    bottom: parent.bottom
-      //    right: parent.right
-      //    margins: smallGap
-      //}
-      //
-      // MouseArea {
-      //     id: saveButtonMa
-      //
-      //     anchors.fill: parent
-      //     hoverEnabled: true
-      //     onClicked: {
-      //         writeParamFromGui(selectedParameters[selectedParametersCount - 1])
-      //         editingArea.paramsToJson()
-      //         //doneSound.play()
-      //     }
-      // }
-   //}
 
    function findIndexFstAvailable(isImpactOnData = false){
 
@@ -259,7 +232,7 @@ Item{
 
           if(isImpactOnData){
               if (indexesForTextAdded.indexOf(indexSpin.value) >= 0){
-                errorWnd.show("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable)
+                errorWnd.show(qsTr("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable))
                 indexSpin.value = indexFstAvailable
               }
 
@@ -274,7 +247,7 @@ Item{
 
             if(isImpactOnData){
                 if (indexesForAnalogAdded.indexOf(indexSpin.value) >= 0){
-                  errorWnd.show("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable)
+                  errorWnd.show(qsTr("Внимание, во избежание дублирования индексов в пределах секции текстовых параметров \nпри записи индекс отредактированного параметра будет изменен с " + indexSpin.value + " на " + indexFstAvailable))
                   indexSpin.value = indexFstAvailable
                 }
 

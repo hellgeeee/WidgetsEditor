@@ -11,12 +11,12 @@ Column{
     width: Math.min(220, window.width * 0.25)
     clip: true
     z: 1
-    spacing: smallGap
+    spacing: smallGap * 0.5
 
     states: State {
         name: "opened"
         when: opened
-        PropertyChanges { target: menu; height: stringHeight * 5}
+        PropertyChanges { target: menu; height: stringHeight * 6}
     }
 
     transitions: Transition {
@@ -41,6 +41,10 @@ Column{
    }
    MenuDelegate{
        text: qsTr("<h4>О Виджите</h4>")
+       mode: Mode.EditingMode.ABOUT
+   }
+   MenuDelegate{
+       text: qsTr("<h4>Change Language</h4>")
        mode: Mode.EditingMode.ABOUT
    }
 

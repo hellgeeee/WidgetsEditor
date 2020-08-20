@@ -1,4 +1,5 @@
 import QtQuick 2.10
+import "../rs/Light.js" as Styles
 
 Item {
     id: container
@@ -8,7 +9,7 @@ Item {
     opacity: 0
     width: smallGap
 
-    Rectangle { anchors.fill: parent; color: "Black"; opacity: 0.3 }
+    Rectangle { anchors.fill: parent; color: Styles.Shadow.deepColor; opacity: 0.3 }
 
     BorderImage {
         width: smallGap;
@@ -18,7 +19,7 @@ Item {
             anchors.fill: parent;
             anchors.margins: 1;
             radius: width * 0.5;
-            color: "lightgray"
+            color: Styles.Bulges.deepInColor
         }
     }
     states: State {

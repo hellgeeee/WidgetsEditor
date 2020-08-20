@@ -1,7 +1,7 @@
-
 import QtQuick 2.2
 import QtQuick.Controls 2.10
 import QtGraphicalEffects 1.0 // for DropShadow
+import "../rs/Light.js" as Styles
 
 Item{ // todo get rid of outer Rectangle
     id: delegate
@@ -28,8 +28,8 @@ Item{ // todo get rid of outer Rectangle
     SequentialAnimation {
         id: showAnim
         running: false
-        RotationAnimation { target: rt; from: 0; to: 45; duration: 200 * (index); easing.type: Easing.OutBack; property: "angle" }
-        RotationAnimation { target: rt; from: 45; to: 0; duration: 200 * (index); easing.type: Easing.OutBack; property: "angle" }
+        RotationAnimation { target: rt; from: 0; to: 45; duration: 100 * (index % (window.height / height)); easing.type: Easing.OutQuart; property: "angle" } // можно просто 200 * index
+        RotationAnimation { target: rt; from: 45; to: 0; duration: 100 * (index % (window.height / height)); easing.type: Easing.InQuart; property: "angle" }
     }
 
     Rectangle {
@@ -39,9 +39,9 @@ Item{ // todo get rid of outer Rectangle
             State {
             name: "brighter"
             when: selected
-            PropertyChanges { target: row; color: "ivory"; scale: 0.95}
-            PropertyChanges { target: titleText; color: "#000000"}
-            PropertyChanges { target: descriptionText; color: "#000000"}
+            PropertyChanges { target: row; color: Styles.Bulges.strongOutColor; scale: 0.95}
+            PropertyChanges { target: titleText; color: Styles.Input.textColor}
+            PropertyChanges { target: descriptionText; color: Styles.Input.textColor}
         },
             State {
             name: "hovered"
@@ -92,7 +92,7 @@ Item{ // todo get rid of outer Rectangle
                 source: image
                 onStatusChanged:
                     if(status === Image.Error){
-                        errorWnd.show("Внимание, файл " + trimUrl(image) + " не был найден. \nПожалуйста, проверьте его наличие по указанному пути и соответствие его формата его расширению")
+                        errorWnd.show(qsTr("Внимание, файл " + trimUrl(image) + " не был найден. \nПожалуйста, проверьте его наличие по указанному пути и соответствие его формата его расширению"))
                         curentParameters[index].imageCur = ""
                     }
           }
@@ -123,7 +123,6 @@ Item{ // todo get rid of outer Rectangle
     MouseArea {
         id: ma
 
-      //anchors.fill: parent
       anchors.centerIn: parent
       width: parent.width; height: stringHeight * 2
 
@@ -159,8 +158,8 @@ Item{ // todo get rid of outer Rectangle
         horizontalOffset: 3
         verticalOffset: 3
         radius: 20.0 * scale
-        samples: 17
-        color: "#80000000"
+        samples: Styles.Shadow.samples
+        color: Styles.Shadow.slightColor
         source: row
         scale: row.scale
     }

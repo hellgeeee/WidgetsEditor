@@ -12,6 +12,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Extras 1.4
 import QtMultimedia 5.12
 import Qt.labs.settings 1.0
+import "../rs/Light.js" as Styles
 
 Item {
     id: window
@@ -20,17 +21,23 @@ Item {
     property bool loading: false
 
     /// основное мерило - высота строчки - должно колебаться 30 - 16 px
-    property int stringHeight : Math.min(30, Math.max(16, window.width * 0.05))
+    property int stringHeight : Math.min(Styles.List.stringHeight, Math.max(Styles.List.textSize, window.width * 0.05))
     property int smallGap : stringHeight * 0.2
     property font appFont: editingArea.appFont
-    property color textColor: "#303030"
-    property color borderColor: "lightgray"
-    property int elementsRadius: 10
 
+
+//        Qt.font({
+//                            // family: 'Encode Sans',
+//                            // weight: Font.Black,
+//                            // italic: false,
+//                             pointSize:24// stringHeight * 0.5
+//                         })
+    property color textColor: Styles.Button.textColor
+    property color borderColor: Styles.Button.borderColor//"lightgray"
+    property int elementsRadius: Styles.Application.radius * 2 //10
 
     property var outFileContent: JSON.parse('{}')
-
-    property variant selectedCategories: [] // todo узнать
+    property variant selectedCategories: []
     property int selectedCategoriesCount: 0
 
     property variant selectedParameters: []
@@ -89,9 +96,10 @@ Item {
         height: stringHeight - smallGap
         width: height
         anchors {
-            top: closeButton.top
-            right: closeButton.left
-            rightMargin: width
+            top: window.top
+            right: window.right
+            margins: smallGap
+            //rightMargin: width
         }
         MouseArea {
             anchors.fill: parent
@@ -103,37 +111,37 @@ Item {
         }
     }
 
-    Image {
-        id: closeButton
-
-        source: "../rs/svg/close-button.svg"
-        height: stringHeight - smallGap
-        width: height
-        anchors{
-            top: parent.top
-            right: parent.right
-            margins: smallGap * 0.5
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked:
-                if(curentMode === Mode.EditingMode.ABOUT
-                    || curentMode === Mode.EditingMode.TUTORIAL
-                    || curentMode === Mode.EditingMode.IN_OUT_SETTINGS)
-                       curentMode = Mode.EditingMode.GRAPHIC_EDITING
-                    else{
-                       window.visible = false
-                       pause(1200).triggered.connect(function () {Qt.quit()})
-                       closeSound.play();
-                    }
-
-            ToolTip.visible: containsMouse
-            ToolTip.text: "Закрыть"
-            ToolTip.delay: 300
-        }
-    }
+    //Image {
+    //    id: closeButton
+    //
+    //    source: "../rs/svg/close-button.svg"
+    //    height: stringHeight - smallGap
+    //    width: height
+    //    anchors{
+    //        top: parent.top
+    //        right: parent.right
+    //        margins: smallGap * 0.5
+    //    }
+    //
+    //    MouseArea {
+    //        anchors.fill: parent
+    //        hoverEnabled: true
+    //        onClicked:
+    //            if(curentMode === Mode.EditingMode.ABOUT
+    //                || curentMode === Mode.EditingMode.TUTORIAL
+    //                || curentMode === Mode.EditingMode.IN_OUT_SETTINGS)
+    //                   curentMode = Mode.EditingMode.GRAPHIC_EDITING
+    //                else{
+    //                   window.visible = false
+    //                   pause(1200).triggered.connect(function () {Qt.quit()})
+    //                   closeSound.play();
+    //                }
+    //
+    //        ToolTip.visible: containsMouse
+    //        ToolTip.text: "Закрыть"
+    //        ToolTip.delay: 300
+    //    }
+    //}
 
     Settings {
         property alias width: window.width
@@ -170,6 +178,19 @@ Item {
             intersection = intersectionCur
         }
         return intersection
+    }
+
+    function updateSelectedForNewAvailable(oldSelected, oldAvailable, newAvailable){
+        /// берем старые доступные параметры и новые доступные. И переносим выбранные со старых на новые, сверяясь по имени
+        var newSelected = []
+        for(var i = 0; i < oldSelected.length; i++)
+            for(var j = 0; j < newAvailable.length; j++)
+            if(oldAvailable[oldSelected[i]].name === newAvailable[j].name){
+                newSelected.push(j)
+                print("names in indexes "+ i + " and " + j +" are equal: " + oldAvailable[i].name + ", " + newAvailable[j].name)
+            }
+        print("old available: " + oldAvailable + "\nnew available: " + newAvailable + "\nold selected: " + oldSelected + "\nnew selected: " + newSelected)
+        return newSelected
     }
 
     function resetParam(paramNum){

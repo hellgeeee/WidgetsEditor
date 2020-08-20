@@ -47,8 +47,6 @@ Item {
             }
         }
         ToolTip.visible: hovered && shift < 0
-
-        Border{}
     }
 
     Text{
@@ -89,8 +87,6 @@ Item {
             }
         }
         ToolTip.visible: hovered && shift < 0
-
-        Border{}
     }
 
     FolderDialog {
@@ -160,17 +156,4 @@ Item {
         req.send()
         return req.status === 200
     }
-
-    // раскомментить в случае, если будете считывать файл из qml,  а не из с++
-    /*function readOutputFile(){
-       var xhr = new XMLHttpRequest
-       xhr.open("GET", "file:///" + widgetsEditorManager.IPEFolder + "../../" +  fileName); // set Method and File
-       var response
-       xhr.onreadystatechange = function () {
-           if(xhr.readyState === XMLHttpRequest.DONE){ // if request_status == DONE
-               editingArea.outputFileText = xhr.responseText; // todo нехорошо использовать эту переменную здесь (нарушается модульность)
-           }
-       }
-       xhr.send(); // begin the request
-   }*/
 }

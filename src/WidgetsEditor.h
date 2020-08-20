@@ -95,6 +95,7 @@ class WidgetsEditorManager : public QObject{
     Q_PROPERTY(QString inFileName READ inFileName WRITE setInFileName NOTIFY inFileChanged)
     Q_PROPERTY(QString outFileName READ outFileName WRITE setOutFileName NOTIFY outFileChanged)
     Q_PROPERTY(QString selectedCategories WRITE setSelectedCategories NOTIFY selectedCategoriesChanged)
+    //Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
 
 public:
     WidgetsEditorManager(QObject* parent = nullptr) : QObject(parent) {}
@@ -118,6 +119,8 @@ public:
     QString outFileContent(){return _outFileContent;}
     void setOutFileContent(const QString&);
     void setSelectedCategories(const QString&);
+
+
 
 private:
     QList<QObject*> parse();

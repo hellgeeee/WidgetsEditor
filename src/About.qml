@@ -1,4 +1,5 @@
 import QtQuick 2.10
+import "../rs/Light.js" as Styles
 
 Column {
     visible: curentMode === Mode.EditingMode.ABOUT
@@ -17,6 +18,8 @@ Column {
            <b>Контакты разработчика</b>: Ольга Рязанова, olga.riazanova2011@ya.ru<br>'
        )
        onLinkActivated: Qt.openUrlExternally(link)
+       font: appFont
+       color: Styles.Input.textColor
     }
 
     Text{
@@ -30,6 +33,8 @@ Column {
             <a href="https://prnt.sc/tib7ah">http://wiki.integra-s.com</a></html>'
         )
        onLinkActivated: Qt.openUrlExternally(link)
+       font: appFont
+       color: Styles.Input.textColor
     }
 
     Text{
@@ -42,5 +47,7 @@ Column {
             Схема взаимодействия с пользователем</a></html><br>'
        )
        onLinkActivated: Qt.openUrlExternally(link)
+       font: appFont
+       color: Styles.Input.textColor
     }
 }

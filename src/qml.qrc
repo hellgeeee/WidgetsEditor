@@ -5,7 +5,6 @@
         <file>AttributeFieldPre.qml</file>
         <file>AttributeFieldText.qml</file>
         <file>AttributesTab.qml</file>
-        <file>BusyIndicator.qml</file>
         <file>CategoryDelegate.qml</file>
         <file>EditingArea.qml</file>
         <file>ErrorWnd.qml</file>
@@ -29,7 +28,9 @@
         <file>../rs/svg/download-symbol.svg</file>
         <file>../rs/svg/file.svg</file>
         <file>../rs/svg/settings_gears.svg</file>
-        <file>Border.qml</file>
         <file>PicturesAvailableList.qml</file>
+        <file>../rs/colours.js</file>
+        <file>../rs/Dark.js</file>
+        <file>../rs/Light.js</file>
     </qresource>
 </RCC>
